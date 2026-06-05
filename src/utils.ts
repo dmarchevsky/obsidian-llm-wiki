@@ -906,6 +906,67 @@ export function matchExtractedToExisting(
   return [...matched];
 }
 
+// Augment each extracted entity/concept's related fields with existing wiki
+// Word-boundary aware substring check. CJK text has no \w chars so \b anchors
+// never fire — fall back to plain includes(). ASCII uses \b to prevent "Java"
+// from matching inside "JavaScript".
+function wordInText(needle: string, haystack: string): boolean {
+  const hasCJK = /[一-鿿㐀-䶿豈-﫿぀-ヿ가-힯]/.test(needle);
+  if (hasCJK) return haystack.includes(needle);
+  const escaped = needle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`\\b${escaped}\\b`).test(haystack);
+}
+
+// pages whose names or aliases appear in the item's text content.
+// Enables cross-source wiki-links: pages created during Source 1 ingestion
+// become linked from Source 2 entity/concept pages when Source 2 mentions them.
+// Pure function — no IO.
+export function crossLinkWithExistingPages(
+  items: Array<{
+    name: string;
+    summary: string;
+    mentions_in_source: string[];
+    related_entities?: string[];
+    related_concepts?: string[];
+  }>,
+  existingPages: Array<{ path: string; title: string; aliases?: string[] }>
+): void {
+  const entityPages = existingPages.filter(p => p.path.includes('/entities/'));
+  const conceptPages = existingPages.filter(p => p.path.includes('/concepts/'));
+
+  for (const item of items) {
+    const searchText = [item.name, item.summary, ...(item.mentions_in_source ?? [])]
+      .join(' ')
+      .toLowerCase();
+    const selfLower = item.name.toLowerCase();
+
+    if (!item.related_entities) item.related_entities = [];
+    if (!item.related_concepts) item.related_concepts = [];
+
+    for (const page of entityPages) {
+      const titleLower = page.title.toLowerCase();
+      if (titleLower.length < 3) continue;
+      if (titleLower === selfLower) continue;
+      if (item.related_entities.some(e => e.toLowerCase() === titleLower)) continue;
+      const aliases = (page.aliases ?? []).map(a => a.toLowerCase());
+      if (wordInText(titleLower, searchText) || aliases.some(a => a.length >= 3 && wordInText(a, searchText))) {
+        item.related_entities.push(page.title);
+      }
+    }
+
+    for (const page of conceptPages) {
+      const titleLower = page.title.toLowerCase();
+      if (titleLower.length < 3) continue;
+      if (titleLower === selfLower) continue;
+      if (item.related_concepts.some(c => c.toLowerCase() === titleLower)) continue;
+      const aliases = (page.aliases ?? []).map(a => a.toLowerCase());
+      if (wordInText(titleLower, searchText) || aliases.some(a => a.length >= 3 && wordInText(a, searchText))) {
+        item.related_concepts.push(page.title);
+      }
+    }
+  }
+}
+
 // Coerce a potentially non-array value to an array.
 // Used for LLM output normalization where models may omit empty arrays
 // or return non-array truthy values (e.g. entities: true). Pure function.

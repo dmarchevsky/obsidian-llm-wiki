@@ -43,7 +43,7 @@ async function refreshPagesCopies(ctx: LintContext): Promise<number> {
         })
       : `---\nsource: "${sourcePath}"\n---\n` + linked;
 
-    await ctx.app.vault.adapter.write(copyFile.path, withSource);
+    await ctx.app.vault.modify(copyFile, withSource);
     refreshed++;
   }
   return refreshed;
