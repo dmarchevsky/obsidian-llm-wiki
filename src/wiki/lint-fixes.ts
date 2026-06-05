@@ -708,7 +708,7 @@ tags: [${stubType === 'entity' ? 'other' : 'term'}]
 
     // Count how many pages share the lowercase base name after the rename.
     // If > 1, bare-name links are ambiguous and must be expanded to full-path.
-    const allPages = await getExistingWikiPages(this.ctx.app, wikiFolder);
+    const allPages = await getExistingWikiPages(this.ctx.app, wikiFolder, this.ctx.settings.pagesFolder);
     const sharedCount = allPages.filter(
       p => p.title.replace('.md', '').toLowerCase() === newBasename
     ).length;
@@ -768,7 +768,7 @@ tags: [${stubType === 'entity' ? 'other' : 'term'}]
     await this.ctx.deleteFile(oldPath);
 
     // Scan all wiki pages for references to old path and update them
-    const allPages = await getExistingWikiPages(this.ctx.app, this.ctx.settings.wikiFolder);
+    const allPages = await getExistingWikiPages(this.ctx.app, this.ctx.settings.wikiFolder, this.ctx.settings.pagesFolder);
     let updatedCount = 0;
     for (const page of allPages) {
       const content = await this.ctx.tryReadFile(page.path);
