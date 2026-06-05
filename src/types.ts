@@ -62,7 +62,6 @@ export interface ProviderConfig {
   nameEn: string; // English provider name
   nameZh: string; // Chinese provider name
   baseUrl: string;
-  defaultModel?: string; // deprecated — kept for backward compat, not used for new installs
   apiKeyPlaceholder: string;
   apiKeyPlaceholderEn?: string; // English placeholder
   apiKeyPlaceholderZh?: string; // Chinese placeholder
@@ -257,7 +256,6 @@ export const PREDEFINED_PROVIDERS: Record<string, ProviderConfig> = {
     nameEn: 'OpenAI',
     nameZh: 'OpenAI',
     baseUrl: 'https://api.openai.com/v1',
-    defaultModel: 'gpt-4o',
     apiKeyPlaceholder: 'sk-...',
     apiKeyPlaceholderEn: 'sk-...',
     apiKeyPlaceholderZh: 'sk-...',
@@ -269,7 +267,6 @@ export const PREDEFINED_PROVIDERS: Record<string, ProviderConfig> = {
     nameEn: 'Anthropic (Claude)',
     nameZh: 'Anthropic (Claude)',
     baseUrl: '',
-    defaultModel: 'claude-sonnet-4-6',
     apiKeyPlaceholder: 'sk-ant-...',
     apiKeyPlaceholderEn: 'sk-ant-...',
     apiKeyPlaceholderZh: 'sk-ant-...',
@@ -281,7 +278,6 @@ export const PREDEFINED_PROVIDERS: Record<string, ProviderConfig> = {
     nameEn: 'Google Gemini',
     nameZh: 'Google Gemini',
     baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai',
-    defaultModel: 'gemini-2.5-pro',
     apiKeyPlaceholder: 'AIza...',
     apiKeyPlaceholderEn: 'AIza...',
     apiKeyPlaceholderZh: 'AIza...',
@@ -293,7 +289,6 @@ export const PREDEFINED_PROVIDERS: Record<string, ProviderConfig> = {
     nameEn: 'OpenRouter',
     nameZh: 'OpenRouter',
     baseUrl: 'https://openrouter.ai/api/v1',
-    defaultModel: 'openai/gpt-4o',
     apiKeyPlaceholder: 'sk-or-...',
     apiKeyPlaceholderEn: 'sk-or-...',
     apiKeyPlaceholderZh: 'sk-or-...',
@@ -305,7 +300,6 @@ export const PREDEFINED_PROVIDERS: Record<string, ProviderConfig> = {
     nameEn: 'DeepSeek',
     nameZh: 'DeepSeek',
     baseUrl: 'https://api.deepseek.com/v1',
-    defaultModel: 'deepseek-chat',
     apiKeyPlaceholder: 'sk-...',
     apiKeyPlaceholderEn: 'sk-...',
     apiKeyPlaceholderZh: 'sk-...',
@@ -317,7 +311,6 @@ export const PREDEFINED_PROVIDERS: Record<string, ProviderConfig> = {
     nameEn: 'MiniMax',
     nameZh: 'MiniMax',
     baseUrl: 'https://api.minimaxi.com/v1',
-    defaultModel: 'MiniMax-M2.7',
     apiKeyPlaceholder: 'sk-cp-...',
     apiKeyPlaceholderEn: 'sk-cp-...',
     apiKeyPlaceholderZh: 'sk-cp-...',
@@ -329,7 +322,6 @@ export const PREDEFINED_PROVIDERS: Record<string, ProviderConfig> = {
     nameEn: 'Kimi (Moonshot)',
     nameZh: 'Kimi (Moonshot)',
     baseUrl: 'https://api.moonshot.cn/v1',
-    defaultModel: 'moonshot-v1-8k',
     apiKeyPlaceholder: 'sk-...',
     apiKeyPlaceholderEn: 'sk-...',
     apiKeyPlaceholderZh: 'sk-...',
@@ -341,7 +333,6 @@ export const PREDEFINED_PROVIDERS: Record<string, ProviderConfig> = {
     nameEn: 'GLM (Zhipu AI)',
     nameZh: 'GLM (智谱AI)',
     baseUrl: 'https://open.bigmodel.cn/api/paas/v4',
-    defaultModel: 'glm-4',
     apiKeyPlaceholder: '...',
     apiKeyPlaceholderEn: '...',
     apiKeyPlaceholderZh: '...',
@@ -353,7 +344,6 @@ export const PREDEFINED_PROVIDERS: Record<string, ProviderConfig> = {
     nameEn: 'Ollama (Local)',
     nameZh: 'Ollama (本地)',
     baseUrl: 'http://localhost:11434/v1',
-    defaultModel: 'llama3',
     apiKeyPlaceholder: 'ollama (no Key required)',
     apiKeyPlaceholderEn: 'ollama (no Key required)',
     apiKeyPlaceholderZh: 'ollama (无需Key)',
@@ -365,7 +355,6 @@ export const PREDEFINED_PROVIDERS: Record<string, ProviderConfig> = {
     nameEn: 'LM Studio (Local)',
     nameZh: 'LM Studio（本地）',
     baseUrl: 'http://localhost:1234/v1',
-    defaultModel: 'local-model',
     apiKeyPlaceholder: 'lmstudio',
     apiKeyPlaceholderEn: 'lmstudio (optional)',
     apiKeyPlaceholderZh: 'lmstudio（可选）',
@@ -377,7 +366,6 @@ export const PREDEFINED_PROVIDERS: Record<string, ProviderConfig> = {
     nameEn: 'Custom OpenAI-Compatible',
     nameZh: '自定义 OpenAI 兼容',
     baseUrl: '',
-    defaultModel: '',
     apiKeyPlaceholder: 'API Key',
     apiKeyPlaceholderEn: 'API Key',
     apiKeyPlaceholderZh: 'API Key',
@@ -389,7 +377,6 @@ export const PREDEFINED_PROVIDERS: Record<string, ProviderConfig> = {
     nameEn: 'Custom Anthropic-Compatible',
     nameZh: '自定义 Anthropic 兼容',
     baseUrl: '',
-    defaultModel: '',
     apiKeyPlaceholder: 'API Key',
     apiKeyPlaceholderEn: 'API Key',
     apiKeyPlaceholderZh: 'API Key',
@@ -403,7 +390,7 @@ export const DEFAULT_SETTINGS: LLMWikiSettings = {
   provider: 'anthropic',
   apiKey: '',
   baseUrl: '',
-  model: 'claude-sonnet-4-6',
+  model: '',  // No hardcoded default — user must fetch models or enter manually
   wikiFolder: 'wiki',
   language: 'en',
   wikiLanguage: 'en',

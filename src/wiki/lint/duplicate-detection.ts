@@ -8,7 +8,7 @@ export interface DuplicateCandidate {
   target: string;
   source: string;
   reason: string;
-  signal: 'crossLang' | 'bigram' | 'sharedLinks';
+  signal: 'crossLang' | 'bigram' | 'sharedLinks' | 'caseVariant';
   score: number;
 }
 
@@ -38,13 +38,11 @@ const BODY_STOPWORDS = new Set([
   'where', 'which', 'while', 'will', 'with', 'would', 'your',
 ]);
 
-/** Extract unique meaningful words from body text for content similarity comparison.
- *  More discriminating than character bigrams: common English words and template
- *  headings do not create artificial similarity between different-topic pages. */
+/** Extract unique meaningful words from body text for content similarity comparison. */
 export function bodyWordSet(text: string): Set<string> {
   return new Set(
     text.toLowerCase()
-      .replace(/[^a-z0-9\s]/g, ' ')
+      .replace(/[^\w\s一-鿿]/g, ' ')
       .split(/\s+/)
       .filter(w => w.length > 3 && !BODY_STOPWORDS.has(w)),
   );
@@ -199,6 +197,23 @@ export async function generateDuplicateCandidates(
             break;
           }
         }
+      }
+    }
+  }
+
+  // Signal 3: Case-variant title collision
+  // Two pages whose titles differ only in casing are highly likely duplicates.
+  // e.g., "Unix" vs "unix", "Claude Code" vs "claude-code"
+  for (let i = 0; i < metas.length; i++) {
+    for (let j = i + 1; j < metas.length; j++) {
+      const a = metas[i], b = metas[j];
+      const lowerA = a.title.toLowerCase();
+      const lowerB = b.title.toLowerCase();
+      if (lowerA === lowerB && a.title !== b.title) {
+        // Always pick lowercase-as-slug as target (deterministic merge direction)
+        const [canonical, variant] = a.title < b.title ? [a, b] : [b, a];
+        addCandidate(canonical.path, variant.path,
+          `Case-variant duplicate: "${a.title}" ↔ "${b.title}"`, 'caseVariant', 0.9);
       }
     }
   }

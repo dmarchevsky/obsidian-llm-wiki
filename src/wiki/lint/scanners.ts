@@ -107,7 +107,7 @@ export function scanDeadLinks(
         if (!isSlugMatch) {
           deadLinks.push({
             source: path.replace(wikiFolder + '/', '').replace('.md', ''),
-            target,
+            target
           });
         }
       }

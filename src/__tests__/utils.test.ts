@@ -132,6 +132,32 @@ describe('computeSlug', () => {
   it('removes special characters and normalizes spaces', () => {
     expect(computeSlug('hello?world!')).toBe('helloworld');
   });
+
+  it('lowercases single-word uppercase input', () => {
+    expect(computeSlug('Unix')).toBe('unix');
+  });
+
+  it('lowercases mixed-case input', () => {
+    expect(computeSlug('iPhone')).toBe('iphone');
+  });
+
+  it('lowercases multi-word uppercase input with spaces', () => {
+    expect(computeSlug('Claude Code')).toBe('claude-code');
+  });
+
+  it('lowercases input with special characters preserved', () => {
+    // & is not in the invalid-char regex, so it survives; the T→t step lowercases
+    expect(computeSlug('AT&T')).toBe('at&t');
+  });
+
+  it('leaves already-lowercase input unchanged', () => {
+    expect(computeSlug('hello')).toBe('hello');
+  });
+
+  it('lowercases ASCII portion while preserving CJK characters', () => {
+    // CJK has no upper/lower case; only the ASCII "Supervised Learning" is lowercased
+    expect(computeSlug('机器学习 Supervised Learning')).toBe('机器学习-supervised-learning');
+  });
 });
 
 describe('parseFrontmatter', () => {
