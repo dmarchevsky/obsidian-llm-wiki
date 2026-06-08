@@ -728,6 +728,13 @@ export class LLMWikiSettingTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
+      .setName(this.getText('autoSmartFixName'))
+      .setDesc(this.getText('autoSmartFixDesc'))
+      .addToggle(toggle => toggle
+        .setValue(this.tempSettings.autoSmartFix)
+        .onChange((value) => { this.tempSettings.autoSmartFix = value; }));
+
+    new Setting(containerEl)
       .setName(this.getText('copySourcePagesToggle'))
       .setDesc(this.getText('copySourcePagesDesc'))
       .addToggle(toggle => toggle

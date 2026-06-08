@@ -946,7 +946,12 @@ export async function runLintWiki(ctx: LintContext, signal?: AbortSignal): Promi
     }
 
     stageNotice.hide();
-    new LintReportModal(ctx.app, fullReport, fixCallbacks, counts, ctx.settings.language).open();
+    if (ctx.settings.autoSmartFix && fixCallbacks.onFixAll) {
+      new Notice(getText(ctx.settings.language, 'autoSmartFixNotice'));
+      fixCallbacks.onFixAll();
+    } else {
+      new LintReportModal(ctx.app, fullReport, fixCallbacks, counts, ctx.settings.language).open();
+    }
     await ctx.wikiEngine.generateIndexFromEngine();
     new Notice(TEXTS[ctx.settings.language].lintWikiComplete);
 
