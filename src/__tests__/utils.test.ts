@@ -867,6 +867,8 @@ describe('appendGranularityToPrompt', () => {
     startupCheck: false, pageGenerationConcurrency: 3, batchDelayMs: 500,
     llmReady: false,
     maxTokensPerCall: 0,
+    copySourcePagesToWiki: false,
+    pagesFolder: 'pages',
   };
 
   it('appends granularity instruction to existing prompt', () => {
