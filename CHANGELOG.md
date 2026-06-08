@@ -5,6 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.16.3] - 2026-06-07
+
+### Fixed
+- **Issue #94 (Lint cancel status bar) — regression fix**: v1.16.2 wired AbortSignal through to the fix-runners, but the LintReportModal still called `this.close()` on every fix-button click, which fired `onClose` → `endLintOperation` and hid the status bar before the user could cancel. The fix gives each fix phase its own lint-operation lifecycle (startLintOperation + endLintOperation wraps the async work) so the status bar persists across fix phases. Modal closes immediately (preserving the original UX); the user gets a top-right progress notice from the fix runner and the bottom-right status bar for cancellation.
+- **Issue #94 (batch count display)**: the duplicates-check progress Notice showed "X/4" (outer round counter) instead of "1-4/16" (inner batch range matching the console log). Now shows the actual inner-batch range so console and Notice stay in sync.
+- **#243 thinkingControlCache key mismatch**: extracted `getThinkingControlCacheKey()` helper so read and write paths in main.ts use the same cache key. Previously, predefined providers without a baseUrl override caused cache writes to use `''` as key while reads used the PREDEFINED baseUrl — cache would forever-miss. Also skip writes when cacheKey is empty.
+- **#244 deleteEmptyStubs error handling**: now returns `{deleted, failed, errors}` instead of throwing on the first failure. Each file wrapped in try/catch so vault race conditions can't half-delete the wiki. Added `lintDeleteFailed` i18n key in 8 languages.
+- **#245 thinkingControlSupported cache after fallback**: `OpenAICompatibleClient.createMessage` and `createMessageStream` now set `this.thinkingControlSupported = false` after a successful 400-fallback, so subsequent calls to the same baseUrl skip the redundant 400 round-trip.
+- **#248 isThinkingControlError tightening**: now requires both an HTTP 400 status and a rejected-field/parameter keyword in the message. Was matching any error containing "thinking" — false positives on non-400 errors and on messages that mentioned thinking incidentally.
+- **Batch count display in i18n strings**: replaced 3 hardcoded English progress strings (`Checking duplicates: batch i/N...`, `Fixing polluted page i/N: title → newTitle`, `🧹 Fix polluted pages (${count})`) with proper i18n keys (`lintCheckingDuplicatesProgress`, `lintFixingPolluted`, `lintModalFixPolluted`) in 8 locales.
+- **de.ts trailing-comma syntax error**: 6 other language files had the same issue (trailing spaces where commas should be) — all fixed in lockstep.
+
+### Changed
+- **endLintOperation made idempotent**: safe against double-call (e.g., modal close + a new per-phase lifecycle both calling it).
+- **Test rename** (#246): "omits thinking for Gemini" → "sends thinking.type=disabled for Gemini baseUrl" (assertion always asserted sent; old name misled future readers).
+
+### Tests
+- 549/549 passing. No new tests needed (changes are defensive correctness + UX).
+
+## [1.16.2] - 2026-06-07
+
+### Fixed
+- **Issue #94 (Lint cancellation)**: `AbortSignal` now propagates through all 5 fix-runner functions (`runAliasCompletion`, `runDeadLinkFixes`, `runEmptyPageFixes`, `runOrphanFixes`, `runDuplicateMerges`) — clicking the status bar "click to cancel" during fix phases works as intended. All persistent Notices are wrapped in `try/finally` so they dismiss even on cancellation.
+- **Issue #96 (Lint granularity)**: LLM analysis step in lint now respects the user's `extractionGranularity` setting via `appendGranularityToPrompt` — previously it was unconstrained.
+- **Issue #99 (Thinking token bleeding)**: Three-layer defense against reasoning preamble leaking into wiki pages: (1) API-level `disableThinking` sends `thinking.type='disabled'` uniformly, with 400 fallback; (2) `parseJsonResponse` strips `<think>`/`<thinking>` before JSON extraction; (3) `cleanMarkdownResponse` discards preamble before `\n---\n` or `\n# ` structural markers. Test Connection probes and caches the result per provider.
+- **Issue #86 (Frontmatter dates)**: Root cause was preamble before frontmatter (shared with #99). Fixed by the `cleanMarkdownResponse` Layer B2 preamble detection.
+
+### Added
+- **Issue #103 (Delete empty stubs)**: New "Delete empty stubs" button in the Lint report modal, alongside the existing "Expand empty pages" button. Skips pages with `reviewed: true`. No configuration needed — appears when empty stubs exist. (8-language i18n.)
+
+### Changed
+- **LLM client interface**: `disableThinking?: boolean` added to `createMessage` and `createMessageStream`. `OpenAICompatibleClient` uses `thinking.type='disabled'` uniformly (Anthropic-style). Provider 400 errors trigger automatic fallback retry without the field.
+
+### Tests
+- 549/549 passing (was 512). 37 new tests: fix-runners signal propagation, granularity prompt injection, cleanMarkdownResponse Layer B2 preamble detection (8 cases), parseJsonResponse think-block stripping (3), disableThinking provider mapping (4), createMessageStream disableThinking (3), 400 fallback (2), fixNotice cleanup (2), appendGranularityToPrompt (4).
+
 ## [1.16.1] - 2026-06-05
 
 ### Fixed

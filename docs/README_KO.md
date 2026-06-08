@@ -6,13 +6,15 @@
 >
 > **Obsidian 공식 평점 95/100** | 8개 언어 네이티브 지원 | 활발한 유지보수, 지속 진화
 
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/green-dalii/obsidian-llm-wiki) [![Release Obsidian plugin](https://github.com/green-dalii/obsidian-llm-wiki/actions/workflows/release.yml/badge.svg)](https://github.com/green-dalii/obsidian-llm-wiki/actions/workflows/release.yml) ![Version](https://img.shields.io/github/v/release/green-dalii/obsidian-llm-wiki?style=flat-square) ![Author](https://img.shields.io/badge/author-Greener--Dalii-blue?style=flat-square) ![License](https://img.shields.io/badge/license-MIT-green?style=flat-square) ![Maintenance](https://img.shields.io/badge/maintenance-actively%20maintained-brightgreen?style=flat-square) ![Build Status](https://img.shields.io/github/actions/workflow/status/green-dalii/obsidian-llm-wiki/release.yml?style=flat-square) ![Obsidian Compatibility](https://img.shields.io/badge/obsidian-1.6.6%2B-purple?style=flat-square) ![GitHub Stars](https://img.shields.io/github/stars/green-dalii/obsidian-llm-wiki?style=flat-square) ![Downloads](https://img.shields.io/badge/dynamic/json?logo=obsidian&color=483699&label=downloads&query=$[karpathywiki].downloads&url=https://raw.githubusercontent.com/obsidianmd/obsidian-releases/master/community-plugin-stats.json&style=flat-square) ![Languages](https://img.shields.io/badge/languages-8-informational?style=flat-square) ![Providers](https://img.shields.io/badge/providers-8%2B-cyan?style=flat-square)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/green-dalii/obsidian-llm-wiki) [![Release Obsidian plugin](https://github.com/green-dalii/obsidian-llm-wiki/actions/workflows/release.yml/badge.svg)](https://github.com/green-dalii/obsidian-llm-wiki/actions/workflows/release.yml) ![Version](https://img.shields.io/github/v/release/green-dalii/obsidian-llm-wiki?style=flat-square) ![Author](https://img.shields.io/badge/author-Greener--Dalii-blue?style=flat-square) ![License](https://img.shields.io/badge/license-MIT-green?style=flat-square) ![Maintenance](https://img.shields.io/badge/maintenance-actively%20maintained-brightgreen?style=flat-square) ![Build Status](https://img.shields.io/github/actions/workflow/status/green-dalii/obsidian-llm-wiki/release.yml?style=flat-square) ![Obsidian Compatibility](https://img.shields.io/badge/obsidian-1.6.6%2B-purple?style=flat-square) ![GitHub Stars](https://img.shields.io/github/stars/green-dalii/obsidian-llm-wiki?style=flat-square) ![Downloads](https://img.shields.io/badge/dynamic/json?logo=obsidian&color=483699&label=downloads&query=$[karpathywiki].downloads&url=https://raw.githubusercontent.com/obsidianmd/obsidian-releases/master/community-plugin-stats.json&style=flat-square) ![Languages](https://img.shields.io/badge/languages-8-informational?style=flat-square) ![Providers](https://img.shields.io/badge/providers-12%2B-cyan?style=flat-square)
 
 [English](../README.md) | [中文文档](README_CN.md) | [日本語](README_JA.md) | [한국어](README_KO.md) | [Deutsch](README_DE.md) | [Français](README_FR.md) | [Español](README_ES.md) | [Português](README_PT.md)
 
 [공식 사이트](https://llmwiki.greenerai.top/) | [블로그](https://llmwiki.greenerai.top/blog/) | [피드백 토론](https://github.com/green-dalii/obsidian-llm-wiki/discussions) | [🤖 DeepWiki로 코드베이스 탐색](https://deepwiki.com/green-dalii/obsidian-llm-wiki)
 
 ---
+
+> **⚡ 빠른 업데이트 알림：** 이 프로젝트는 빠르게 진화하며 버그 수정, 성능 개선, 새로운 기능 및 UX 최적화를 자주 제공합니다. Obsidian에서 항상 최신 버전으로 업데이트하고(**설정 → 커뮤니티 플러그인 → 업데이트 확인**), 플러그인 자동 업데이트를 활성화하세요.
 
 ## 📑 Contents
 
@@ -24,7 +26,7 @@
   - [🔑 LLM Provider 설정](#-llm-provider-설정)
   - [🎮 사용법](#-사용법)
   - [⚠️ 이전 버전에서 업그레이드하시나요?](#️-이전-버전에서-업그레이드하시나요)
-- [⚡ v1.16.1 업데이트 하이라이트](#-v1161-업데이트-하이라이트)
+- [⚡ v1.16.3 업데이트 하이라이트](#-v1163-업데이트-하이라이트)
 - [✨ 주요 기능](#-주요-기능)
   - [📊 지식 품질](#-지식-품질)
   - [🛠️ 유지 관리](#️-유지-관리)
@@ -59,151 +61,30 @@
 
 ---
 
-## ⚡ Obsidian + LLM-Wiki를 선택하는 이유
+## ⚡ v1.16.3 업데이트 하이라이트
 
-Obsidian은 연결된 사고(Linked Thinking)에 탁월합니다. 하지만 한 가지 문제가 있습니다: 연결하는 사람은 항상 당신이어야 합니다.
+이번 릴리스는 **핫픽스 릴리스**로, v1.16.2 P0 버그 수정 배치를 완성합니다. v1.16.2의 Lint 취소 상태 표시줄 수정이 불완전했습니다(수정 버튼 클릭 후 모달이 즉시 닫혀 사용자가 취소할 수 있기 전에 상태 표시줄이 숨겨짐). 또한 v1.16.2 리뷰 후 5개의 cleanup 항목도 함께 제공합니다. **호환성 깨짐 없음, 재구성 불필요.**
 
-LLM-Wiki는 이 관계를 뒤집습니다. 그래프를 수동으로 구축하는 대신 AI가 노트와 함께 성장합니다. 새로운 개념에 대한 노트를 추가하면 — 당신이 놓칠 수 있는 연결을 찾아냅니다. 질문을 하면 — 당신의 지식 그래프를 탐색하고 인용과 함께 답변을 가져옵니다.
+**주요 수정 사항:**
 
-- **🔗 Graph View가 활성화됩니다.** 새 노트는 그냥 놓여 있지 않습니다 — Entity, Concept, Source로 링크가 생성됩니다. 그래프는 유기적으로 성장하고 플러그인이 유지 관리합니다: 중복 감지, dead link 수정, alias를 통한 언어 연결.
-- **💬 노트가 응답하기 시작합니다.** 검색이 대화가 됩니다. "X에 대해 무엇을 썼었나?"가 대화가 되며, 스트리밍 응답과 `[[wiki-links]]`가 breadcrumb이 됩니다. 모든 답변은 당신의 지식으로 더 깊이 들어가는 경로입니다.
-- **🧠 Obsidian이 사고의 파트너가 됩니다.** 노트를 보관하는 캐비닛이 아니라 *생각*을 돕는 도구가 됩니다 — 숨겨진 연결을 표면화하고, 모순을 표시하고, 잊고 있던 것을 기억해냅니다.
+- **Lint 취소 상태 표시줄이 이제 진짜 작동합니다 (Issue #94).** v1.16.2에서는 AbortSignal을 fix-runner로 전파했지만 버튼 클릭 시 모달이 닫혀 — onClose → endLintOperation이 발화되어 사용자가 취소할 수 있기 전에 상태 표시줄이 숨겨졌습니다. 수정: 각 수정 단계에 독립적인 lint operation 라이프사이클을 부여 — 수정 버튼 클릭 시 `startLintOperation` 호출, 수정 완료 시 `endLintOperation` 호출. 모달은 즉시 닫히고(기존 UX 유지), 사용자는 상단 진행 Notice와 하단 상태 표시줄이 수정 내내 계속 표시되어 클릭하여 취소 가능.
 
----
+- **중복 검사 진행 표시가 콘솔과 일치 (Issue #94 후속).** 이전에는 "1/4"(외부 라운드 수)가 표시되어 정상은 "1-4/16"(내부 배치 범위)였습니다. Notice와 콘솔 로그가 일치하도록 수정됨 — 더 이상 진행 상황을 혼동하지 않음.
 
-## 🚀 빠른 시작
+- **thinkingControlCache 키 수정 (Issue #243).** 사전 정의된 공급자를 baseUrl 덮어쓰기 없이 사용할 때 캐시 쓰기는 빈 키를, 읽기는 사전 정의된 URL을 사용하여 캐시가 영영 미스하고 매 호출마다 낭비적인 400 라운드트립을 트리거했습니다. 읽기/쓰기 경로가 이제 동일한 `getThinkingControlCacheKey()` 헬퍼를 사용합니다.
 
-### 📦 설치
+- **deleteEmptyStubs에 탄력성 부여 (Issue #244).** 단일 vault 읽기 또는 deleteFile 실패가 더 이상 전체 루프를 중단하지 않습니다. 각 파일이 독립적으로 try/catch되며, 사용자에게는 삭제 성공/실패 카운트를 명확한 Notice로 표시.
 
-**🌟 권장 방법 — Obsidian Community Plugin Market:**
+- **thinking-control 폴백 후 음수 결과 캐시 (Issue #245).** `OpenAICompatibleClient`는 400 폴백 성공 후 `thinkingControlSupported = false`를 설정하여, 동일 baseUrl의 후속 호출이 중복된 프로브-실패 라운드트립을 건너뜁니다.
 
-1️⃣ Obsidian에서 **설정 → Community plugins**로 이동합니다
-2️⃣ **Browse**를 클릭하고 "Karpathy LLM Wiki"를 검색합니다
-3️⃣ **Install**을 클릭한 후 **Enable**을 클릭합니다
+- **i18n 정리 (Issue #94 후속 + #248):** 3개의 하드코딩된 영어 진행 문자열을 적절한 i18n 키(`lintCheckingDuplicatesProgress`, `lintFixingPolluted`, `lintModalFixPolluted`)로 교체, 8개 언어 모두 적용. thinking-control 오류 감지는 이제 HTTP 400 상태와 거부된 필드 키워드를 모두 요구함 — 이전에는 "thinking"을 포함한 모든 오류에 일치하여 오탐 폴백을 유발했음.
 
-**🌐 또는 Community Plugin 웹사이트에서 —** [community.obsidian.md/plugins/karpathywiki](https://community.obsidian.md/plugins/karpathywiki)를 방문하고 **Add to Obsidian**을 클릭해 직접 설치합니다.
+**이전 버전에서 업그레이드?** 호환성 깨짐 없음, 재구성 불필요. 기존 Wiki, 설정, 워크플로우가 모두 유지됩니다.
 
-**⚙️ 수동 설치 (대안):**
-
-1️⃣ [Releases](https://github.com/green-dalii/obsidian-llm-wiki/releases)에서 `main.js`, `manifest.json`, `styles.css`를 다운로드합니다
-2️⃣ Obsidian에서 설정 → Community plugins로 이동합니다. **Installed plugins** 탭에서 폴더 아이콘을 클릭해 plugins 디렉터리를 엽니다
-3️⃣ `karpathywiki` 폴더를 생성하고 세 개의 파일을 안에 넣습니다
-4️⃣ Obsidian으로 돌아가 새로고침 아이콘을 클릭합니다 — **Karpathy LLM Wiki**가 Installed plugins에 표시됩니다
-5️⃣ 토글을 켜서 활성화합니다
-
-**🔨 개발:** `git clone`, `pnpm install`, `pnpm build`.
-
-### 🔄 플러그인 업데이트
-
-이 프로젝트는 빠르게 발전하고 있으며, 새로운 기능, 버그 수정, 개선이 자주 출시됩니다. 항상 최신 상태를 유지하는 것을 권장합니다:
-
-**방법 A — 수동 업데이트 (권장):**
-1. **설정 → 커뮤니티 플러그인**으로 이동
-2. **업데이트 확인**을 클릭
-3. 목록에서 **Karpathy LLM Wiki**를 찾아 **업데이트**를 클릭합니다
-
-**방법 B — 자동 업데이트 활성화:**
-1. **설정 → 커뮤니티 플러그인**으로 이동
-2. **플러그인 업데이트 자동 확인**을 켭니다
-3. 새 버전을 감지하면 수동으로 업데이트할 수 있습니다
-
-> 💡 **왜 계속 업데이트해야 할까요?** 각 릴리스에는 새로운 기능, 성능 개선, 중요한 버그 수정이 포함될 수 있습니다. 우리는 이 플러그인을 활발히 유지 관리하고 있습니다 — 업데이트를 놓치면 더 나은 경험을 놓치게 됩니다.
-
-### 🔑 LLM Provider 설정
-
-1️⃣ 설정 → Karpathy LLM Wiki를 엽니다
-2️⃣ 드롭다운에서 provider를 선택합니다(Anthropic, Anthropic Compatible, Google Gemini, OpenAI, DeepSeek, Kimi, GLM, Ollama, OpenRouter 또는 custom)
-3️⃣ API key를 입력합니다(Ollama는 필요 없음)
-4️⃣ **Fetch Models**를 클릭해 model 드롭다운을 채우거나, model 이름을 수동으로 입력합니다
-5️⃣ **Test Connection**을 클릭한 후 **Save Settings**를 클릭합니다
-
-**🦙 Ollama (로컬, API key 없음):** [Ollama](https://ollama.com)를 설치하고 model을 pull합니다(`ollama pull gemma4`), provider 드롭다운에서 "Ollama (Local)"을 선택합니다.
-
-### 🎮 사용법
-
-| 방법 | 설명 |
-|------|------|
-| **📥 단일 소스 수집** | `Cmd+P` → "단일 소스 수집" — 특정 노트를 선택하여 엔티티와 컨셉을 Wiki 페이지로 추출 |
-| **📂 폴더에서 수집** | `Cmd+P` → "폴더에서 수집" — 폴더를 선택하고 모든 노트를 배치 처리 |
-| **🔍 위키 질의** | `Cmd+P` → "위키 질의" — 질문하고 `[[wiki-links]]`가 포함된 스트리밍 답변 획득 |
-| **🛠️ 위키 린트** | `Cmd+P` → "위키 린트" — 중복, dead link, orphan, 빈 페이지, 누락된 별칭 건강 검사 |
-| **📋 인덱스 재생성** | `Cmd+P` → "인덱스 재생성" — 별칭 정보가 포함된 `wiki/index.md` 재구축 |
-| **⏹️ 작업 취소** | `Cmd+P` → "Cancel current ingestion" 또는 상태 표시줄 클릭 — 배치 경계에서 안전하게 중지 |
-| **🎯 원클릭 수집** | 왼쪽 사이드바 `sticker` 아이콘 또는 `Cmd+P` → "Ingest current file" — 현재 열린 파일 직접 수집 |
-| **💡 스키마 업데이트 제안** | `Cmd+P` → "스키마 업데이트 제안" — LLM이 Wiki를 분석하여 스키마 개선 제안 |
-
-동일한 source를 다시 수집하면 Entity/Concept 페이지에 incremental update가 적용됩니다(새 정보가 병합됨). Summary 페이지는 다시 생성됩니다.
-
-**💡 스마트 배치 스킵:** 폴더 수집 시 플러그인은 이미 처리된 파일을 자동으로 감지하고 스킵하여 시간과 API 비용을 절약합니다. 배치 보고서에 스킵된 횟수가 표시됩니다.
-
-### ⚠️ 이전 버전에서 업그레이드하시나요?
-
-**이번 릴리스는 완전히 하위 호환됩니다.** v1.14.0에는 호환성을 깨는 변경이 없습니다 — 기존 Wiki 페이지, 설정, 워크플로는 그대로 유지됩니다. 재설정이나 데이터 마이그레이션이 필요하지 않습니다.
-
-**여러 버전을 거쳐 구축된 기존 Wiki**는 일부 페이지에 최근 기능(별칭, 별칭 인식 중복 제거, 개선된 프롬프트)이 누락되어 있을 수 있습니다. **Lint Wiki**를 실행하여 확인이 필요한 항목을 확인하세요. Smart Fix All은 가장 일반적인 정리를 한 번의 클릭으로 처리합니다.
-
-**v1.14.0 이전 버전에서 업그레이드하는 경우**, **Lint Wiki**를 한 번 실행하여 이전 버전의 문제를 자동으로 수정하세요:
-- **log.md의 이중 중첩 링크** `[[[[entities/Foo|Foo]]]]` — Lint가 LLM 비용 없이 감지하고 수정합니다
-- **교차 디렉토리 스텁 중복** — `entities/`와 `concepts/` 양쪽에 동일한 슬러그로 존재하는 페이지가 이제 올바르게 매칭됩니다
-
-**여러 버전을 거쳐 구축된 Wiki**의 경우, 아래 단계를 따라 Wiki를 최신 표준으로 업데이트하세요:
-
-**1️⃣ 인덱스 재빌드**
-`Cmd+P` → **"인덱스 재생성"** — 모든 페이지의 별칭 항목을 포함하여 `wiki/index.md`를 다시 빌드합니다. 별칭 기반 검색이 활성화됩니다(예: "DSA" 검색으로 "DeepSeek-Sparse-Attention"을 찾을 수 있음). 기존 인덱스 형식은 페이지 제목만 나열했습니다.
-
-**2️⃣ 위키 린트 실행**
-`Cmd+P` → **"위키 린트"** — 전체 Wiki를 스캔하여 다음을 표시합니다:
-- **🏷️ 누락된 별칭**: 별칭이 없는 페이지(한 번도 "Complete Aliases"를 실행하지 않은 모든 버전). **"Complete Aliases"** 버튼을 클릭하면 LLM이 번역, 약어, 대체 이름을 일괄 생성합니다. 이는 중복 감지에 매우 중요합니다.
-- **🔄 중복 페이지**: 콘텐츠가 중복되는 페이지(예: 별칭 인식 중복 감지가 없던 이전 버전에서 생성된 "CoT"와 "사고사슬"). **"Merge Duplicates"** 버튼을 클릭하면 융합하고 모든 별칭을 보존합니다.
-- **💀 데드 링크 / 빈 페이지 / 고아 페이지**: 표준 Wiki 유지보수 항목입니다.
-
-**3️⃣ Smart Fix All 사용**
-Lint 보고서에서 **"Smart Fix All"** 버튼을 클릭하면 인과 관계 순서로 원클릭 수정이 실행됩니다: 별칭 완성 → 중복 병합 → 데드 링크 수정 → 고아 페이지 연결 → 빈 페이지 확장. 여러 버전을 거쳐 구축된 Wiki를 정리하는 가장 빠른 방법입니다.
-
-**4️⃣ 병렬 페이지 생성 활성화**
-설정 → **Ingestion Acceleration**:
-- **⚡ Page Generation Concurrency**: 대부분의 Provider에서 3으로 설정. Entity가 10개 이상인 소스에서 수집 속도가 2~3배 빨라집니다.
-- **⏱️ Batch Delay**: 300ms부터 시작. 속도 제한이 발생하면 500~800ms로 늘리세요.
-
-**5️⃣ 현재 설정 검토:**
-- **🌐 Wiki 출력 언어**: UI 언어와 독립적 — Wiki는 한국어로, 플러그인 UI는 영어로 설정할 수 있으며 그 반대도 가능합니다.
-- **📊 추출 세분화**: 5개 옵션으로 LLM이 소스에서 Entity를 추출하는 깊이를 제어합니다:
-  - **세밀** (약 100개) — 깊이 분석, 가장자리 언급 포함. 높은 토큰 비용, 핵심 소스용.
-  - **표준** (약 50개) — 균형 잡힌 추출. 일상 노트의 좋은 기본값.
-  - **굵음** (약 10개) — 빠른 개요, 핵심 Entity만. 낮은 비용, 빠른 수집.
-  - **최소** (약 5개) — 필수 항목만. 100개 이상 파일 배치 처리나 새 소스 테스트에 이상적.
-  - **사용자 정의** (1~300개) — 특수 워크플로용 사용자 정의 Entity/Concept 상한.
-  > 💡 **추천**: 대규모 폴더 배치 처리에는 최소 또는 굵음을 사용하여 시간과 API 비용을 절약하세요. 세밀은 깊이 분석이 필요한 핵심 문서에만 선택적으로 사용하세요.
-- **🔄 자동 유지보수**: 선택적 파일 감시, 주기적 Lint, 시작 시 상태 검사. 모두 기본 OFF — 자동 백그라운드 처리가 필요할 때만 활성화하세요.
-
-> **🛡️ 안전**: 병렬 생성은 `Promise.allSettled`를 사용합니다 — 한 페이지가 실패해도 다른 페이지는 계속됩니다. 실패한 페이지는 지수 백오프와 함께 개별적으로 재시도됩니다. Smart Batch Skip은 이미 처리된 파일을 자동으로 감지하여 시간과 API 비용을 절약합니다.
+**모든 사용자에게 이 버전으로의 업그레이드를 강력히 권장합니다** — Lint 취소 수정이 cancel-UX 스토리를 완성하고, 캐시와 탄력성 수정은 모든 Lint 호출에서 조용히 작동합니다.
 
 ---
----
 
-## ⚡ v1.16.1 업데이트 하이라이트
-
-이번 릴리스는 **안정성 + UX 핫픽스**로, Anthropic CORS 회귀를 해결하고 오랫동안 존재한 Lint 오탐지 문제를 해결합니다. 새로운 기능 없음, 호환성 깨짐 없음.
-
-**핵심 수정：**
-
-- **Anthropic CORS 회귀 해결 (Issue #95).** `@anthropic-ai/sdk` (1.3MB)를 제거하고 `AnthropicClient`를 Obsidian의 `requestUrl` 기반으로 다시 작성했습니다. SDK 내부 `fetch`가 `app://obsidian.md` origin에서 실행되어 CORS에 의해 간헐적으로 차단되었습니다——다른 LLM 플러그인이 채택한 커뮤니티 표준 수정입니다. Prompt caching (`cache_control: ephemeral`)은 원본 request body에 동일한 JSON 구조를 전송하여 유지.
-
-- **Lint 오탐지 해결 (PR #88).** 새로운 `bodyWordSet()`와 `BODY_STOPWORDS` (45개 영어 기능어)가 sharedLinks 중복 후보를 본문 텍스트 유사도 (임계값 ≥ 0.2)로 게이팅. 3개 이상의 페이지가 같은 허브 페이지에 링크하지만 내용이 다른 경우의 오탐지 해결. 또한 `scanDeadLinks`는 타겟 basename에 대해 공백→하이픈 정규화를 수행하여 `[[entities/Claude Code]]`가 `entities/Claude-Code.md`에 올바르게 매치.
-
-- **소문자 slug + 대소문자 변형 감지 (PR #87).** `computeSlug()`가 출력을 소문자화하여 대소문자 구분 파일 시스템에서 중복 페이지 생성 방지. `generateDuplicateCandidates`에 새로운 `caseVariant` 시그널을 추가하여 대소문자가 충돌하는 제목 (예: `Unix` vs `unix`)을 Tier 1으로 감지——LLM 검증 불필요.
-
-- **설정 UX: 하드코딩된 모델 폴백 제거.** 12개 모든 제공자 설정에서 `defaultModel` 제거. `DEFAULT_SETTINGS.model: ''` (새 설치 시 자동 입력 없음). 제공자 전환 시 model 필드 초기화——모델을 가져오거나 수동으로 입력해야 함.
-
-- **설정 UX: 친절한 가져오기 오류 분류.** 새로운 `classifyFetchError()`가 실패를 `Auth` / `Endpoint` / `Server` / `Empty` / `Network` 5가지로 분류. 각 분류는 특정 Notice 표시——예: "인증 실패 (HTTP 401/403). API 키를 확인하거나 모델 ID를 직접 입력한 후 테스트 연결을 클릭하여 검증하세요." 모든 경로에 수동 입력을 폴백으로 명시.
-
-- **설정 UX: 가져오기 성공 시 드롭다운 자동 전환.** Fetch Models 성공 후 모델 선택기가 텍스트 입력에서 드롭다운으로 자동 전환되어 추가 클릭 없이 목록 표시.
-
-**이전 버전에서 업그레이드?** 설치 후 바로 사용——호환성 깨짐 없음, 재설정 불필요. 기존 Wiki, 설정, 워크플로우 보존. 하드코딩된 기본값이 있던 드롭다운 모델 필드는 비어있게 되지만, **Fetch Models** 클릭으로 제공자 API에서 가져올 수 있음.
-
-**본 버전으로의 업그레이드를 강력히 권장**——Anthropic CORS 수정으로 macOS Tahoe 및 SDK의 CORS 동작으로 차단되던 다른 Electron 버전에서 플러그인 기능 복구.
-
----
 ## ✨ 주요 기능
 
 ### 📊 지식 품질
@@ -221,7 +102,7 @@ Lint 보고서에서 **"Smart Fix All"** 버튼을 클릭하면 인과 관계 �
 - **Semantic-Tier 중복 감지** — Tier 1(직접 이름 일치: 교차 언어, 약어, 높은 유사도 제목)은 항상 검증됩니다. Tier 2(간접 신호: 공유 링크, 중간 유사도)은 token 예산을 채웁니다
 - **스마트 일괄 수정** — 인과 관계 순서로 배치 수정: 중복 병합 → dead link 해결 → orphan 연결 → 빈 페이지 확장
 - **Alias 완성** — 누락된 alias의 일괄 병렬 생성을 원클릭으로 수행해 향후 중복 감지를 개선합니다
-- **자동 유지 관리** — 다중 폴더 파일 감시, 주기적 lint, 시작 시 상태 검사(모두 선택적)
+- **자동 유지 관리** — Startup Quick Fixes 기본 ON(시작 시 1회 건강 검사), 다중 폴더 파일 감시와 주기적 lint는 기본 OFF(필요 시 활성화)
 - **모순 상태 머신** — `detected → review_ok → resolved`(AI 수정) 또는 `detected → pending_fix`(수동)
 
 ### 💬 조회 및 피드백
@@ -232,8 +113,8 @@ Lint 보고서에서 **"Smart Fix All"** 버튼을 클릭하면 인과 관계 �
 
 ### 🌐 LLM 및 언어
 
-- **다중 Provider 지원** — Anthropic, Anthropic Compatible(Coding Plan), Gemini, OpenAI, DeepSeek, Kimi, GLM, OpenRouter, Ollama, custom endpoint
-- **5xx 자동 재시도** — 모든 클라이언트에서 HTTP 5xx/429/529/529 오류 시 지수 백오프 재시도(최대 2회)
+- **다중 Provider 지원** — Anthropic, Anthropic Compatible(Coding Plan), Gemini, OpenAI, DeepSeek, Kimi, GLM, MiniMax, LM Studio, OpenRouter, Ollama, custom endpoint
+- **5xx 자동 재시도** — 모든 클라이언트에서 HTTP 5xx/429/529 오류 시 지수 백오프 재시도(최대 2회)
 - **동적 모델 목록** — Provider API에서 실시간 가져오기
 - **Wiki 출력 언어** — 인터페이스와 독립적인 8개 언어(영어/중국어/일본어/한국어/독일어/프랑스어/스페인어/포르투갈어), custom 입력 지원
 - **🌍 전면 UI 국제화** — 플러그인 UI 8개 언어 지원(EN/ZH/JA/KO/DE/FR/ES/PT), 269+ UI 필드 완전 번역, 자연스러운 로컬 표현
@@ -245,7 +126,7 @@ Lint 보고서에서 **"Smart Fix All"** 버튼을 클릭하면 인과 관계 �
 - **병렬 페이지 생성** — 구성 가능한 1–5개 동시 페이지, 기본값 3(병렬), 큰 source에서 2–3× 속도 향상, 페이지별 오류 격리
 - **반복적 배치 추출** — 적응형 배치 크기, 긴 문서의 max_tokens 병목을 해소합니다
 - **3계층 아키텍처** — `sources/`(읽기 전용) → `wiki/`(LLM 생성) → `schema/`(공동 진화 구성)
-- **모듈형 코드베이스** — `src/`의 13개 초점 모듈
+- **모듈형 코드베이스** — `src/`의 20+개 초점 모듈
 
 ### 🔒 개인정보 보호 및 보안
 
@@ -255,10 +136,6 @@ Lint 보고서에서 **"Smart Fix All"** 버튼을 클릭하면 인과 관계 �
 - **최소한의 권한.** Vault 파일 접근은 Wiki 관리에 필요합니다(노트 읽기, 페이지 생성, 데드 링크 감지). 네트워크 접근은 설정한 제공자와의 LLM API 호출에만 사용됩니다. 클립보드 접근은 Query 모달의 "복사" 버튼으로 제한됩니다——클릭할 때만입니다.
 
 ---
-
-
----
-
 ## ⌨️ 명령어
 
 | 명령어 | 설명 |
@@ -292,7 +169,7 @@ Machine learning uses algorithms to learn from data.
 ```markdown
 ---
 type: entity
-created: 2026-05-15
+created: 2025-12-01
 updated: 2026-05-15
 sources: ["[[sources/machine-learning]]"]
 tags: [method]
@@ -335,16 +212,20 @@ Supervised learning(지도 학습)은 레이블이 있는 훈련 데이터에서
 | **🌟 가성비 최고** | **DeepSeek V4-Flash** | 1M tokens | 최저가($0.14/M), 284B MoE, 배치 처리에 최적 |
 | **🌟 가성비 최고** | **Gemini-3.5-Flash** | 1M tokens | GPT-5.5보다 4배 빠른 출력, 에이전트 작업 우수 |
 | **🌟 가성비 최고** | **Qwen3.6-Plus** | 1M tokens | 코딩 및 에이전트 능력 강력, 경쟁력 있는 가격 |
-| **🌟 가성비 최고** | **Grok-4** | 2M tokens | 2M 초장문 컨텍스트, 초대형 Wiki에 최적 |
+| **🌟 가성비 최고** | **Grok-4** | 2M tokens | xAI 2025-07 flagship, 2M context, strong reasoning & code tasks |
 | **균형형** | **Claude Sonnet 4.6** | 1M tokens | 품질과 비용의 좋은 균형, $3/$15 per 1M tokens |
 | **경량형** | **Claude Haiku 4.5** | 200K tokens | 고속 경제, 소형 Wiki에 적합 |
-| **경제형** | **MiMo-V2.5-Flash** | 1M tokens | Xiaomi의 고가성비 선택, 309B MoE 아키텍처 |
+| **경제형** | **Xiaomi MiMo-V2.5** | 1M tokens | Xiaomi 310B/15B MoE, 2026-04 MIT 오픈소스, Agent·멀티모달 |
 | **플래그십형** | Claude Opus 4.7 | 1M tokens | 최고 품질, 비용 높음 — 선택적으로 사용 |
 | **플래그십형** | GPT-5.5 | 1M tokens | 최고 수준 추론, 비용 높음 — 선택적으로 사용 |
 
 로컬 모델(Ollama): 컨텍스트 창이 일반적으로 작습니다(8K–128K). 수집에는 cloud provider를, 조회에는 로컬 모델을 사용하는 것을 권장합니다.
 
 **🔌 Anthropic Compatible(Coding Plan):** Provider가 Anthropic 호환 API 엔드포인트를 제공하는 경우, "Anthropic Compatible"을 선택하고 Provider의 Base URL과 API Key를 입력하세요.
+
+**🦙 Ollama (로컬, API 키 불필요):** [Ollama](https://ollama.com)를 설치하고 모델을 pull(`ollama pull gemma4` 또는 `ollama pull qwen3.5:27b`)한 다음 Provider 드롭다운에서 "Ollama (Local)"을 선택하세요.
+
+**🎛️ LM Studio (로컬, API 키 불필요):** [LM Studio](https://lmstudio.ai)를 설치하고 로컬 서버(기본 `http://localhost:1234/v1`)를 시작한 다음 Provider 드롭다운에서 "LM Studio (Local)"을 선택하세요. LM Studio는 OpenAI 호환 서버를 내장하고 있어 API 키 필드는 선택사항입니다.
 
 > 💡 **구독 플랜:** Coding Plan, OpenAI Pro, Anthropic Pro 등의 구독 플랜은 빈번한 사용 시 비용 관리에 탁월한 선택입니다. 본 플러그인은 이러한 서비스들을 지원합니다.
 
@@ -375,6 +256,7 @@ wiki/               # 📄 Wiki 엔진 모듈
   lint/             # Lint 하위 모듈
     duplicate-detection.ts  # 🔄 프로그램 기반 중복 후보 생성
     fix-runners.ts          # ⚡ 배치 수정 실행 헬퍼
+    scanners.ts            # 🔍 Scanners (dead links, orphans, aliases)
   contradictions.ts # ⚠️ 모순 감지
   system-prompts.ts # 🗣️ 언어 지시 + 섹션 레이블
 schema/             # Schema 공동 진화
@@ -447,13 +329,13 @@ v1.7.10 이전에는 Alias 인식 중복 감지가 없었습니다. **Lint Wiki*
 ### ⚡ 성능 및 비용 관리
 
 **수집 속도를 높이려면 어떻게 하나요?**
-**설정 → Ingestion Acceleration**에서: **Page Generation Concurrency**를 3~5로 증가(병렬 페이지 생성), **Batch Delay**를 100~300ms로 낮춤(속도 제한 주의). "최소", "굵음" 또는 "표준" **추출 세분화**를 선택하면 페이지 수를 줄이고 API 비용을 절약할 수 있습니다.
+**설정 → LLM Configuration**에서: **Page Generation Concurrency**를 3~5로 증가(병렬 페이지 생성), **Batch Delay**를 100~300ms로 낮춤(속도 제한 주의). "최소", "굵음" 또는 "표준" **추출 세분화**를 선택하면 페이지 수를 줄이고 API 비용을 절약할 수 있습니다.
 
 **HTTP 429 오류가 발생하는 이유는 무엇인가요?**
 플러그인이 자동으로 속도 제한을 감지하고 제안합니다: 동시성을 1~2로 낮춤, Batch Delay를 500~800ms로 증가, 또는 더 높은 제한의 Provider로 전환.
 
 **API 비용을 어떻게 제어하나요?**
-- Auto-Maintenance는 기본 OFF (필요할 때만 활성화)
+- Auto-Maintenance는 기본 OFF (Startup Quick Fixes만 기본 ON; 필요할 때만 활성화)
 - Smart Batch Skip이 이미 수집된 파일을 자동 건너뜀
 - "Standard" 또는 "Coarse" 세분화 = 더 적은 LLM 호출
 - Batch Delay > 500ms는 호출 간격만 벌리고 토큰 소비는 증가하지 않음
@@ -508,7 +390,7 @@ MIT License — [LICENSE](LICENSE)를 참조하세요.
 
 - **💡 개념:** [Andrej Karpathy](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) — 원본 LLM Wiki 개념
 - **🛠️ 플랫폼:** Obsidian 팀 — 플러그인 플랫폼 및 API
-- **🔌 LLM SDK:** Anthropic, OpenAI, Google, DeepSeek, Kimi, GLM, OpenRouter, Ollama — LLM provider
+- **🔌 LLM transport:** Obsidian `requestUrl` (Anthropic) + OpenAI SDK (3rd-party OpenAI 호환 Provider)
 
 ---
 

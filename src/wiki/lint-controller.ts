@@ -7,6 +7,7 @@ import { LintFixCallbacks, LintCounts, LintReportModal, FixReportModal, FixRepor
 import { TEXTS } from '../texts';
 import { PROMPTS } from '../prompts';
 import { cleanMarkdownResponse, parseJsonResponse, detectRateLimitFailures, formatRateLimitNotice, getText, parseFrontmatter } from '../utils';
+import { appendGranularityToPrompt } from './system-prompts';
 import { TOKENS_LINT_DEDUP_LLM, NOTICE_NORMAL, NOTICE_RATE_LIMIT } from '../constants';
 import { isPageEmpty, detectPollutedPages, fixDoubleNestedWikiLinks, getExistingWikiPages } from './lint-fixes';
 import { fixPollutedSources, scanPollutedSources } from '../core/sources-normalizer';
@@ -252,7 +253,16 @@ export async function runLintWiki(ctx: LintContext, signal?: AbortSignal): Promi
           for (let i = 0; i < batches.length; i += concurrency) {
             checkCancelled();
             const chunk = batches.slice(i, i + concurrency);
-            stageNotice.setMessage(`Checking duplicates: batch ${Math.floor(i / concurrency) + 1}/${Math.ceil(batches.length / concurrency)}...`);
+            // Show the actual inner-batch range (matches console log) so the
+            // user sees consistent numbers in both places.
+            const batchStart = i + 1;
+            const batchEnd = Math.min(i + concurrency, batches.length);
+            const progressLabel = batchEnd > batchStart
+              ? `${batchStart}-${batchEnd}/${batches.length}`
+              : `${batchStart}/${batches.length}`;
+            stageNotice.setMessage(t.lintCheckingDuplicatesProgress
+              .replace('{current}', progressLabel)
+              .replace('{total}', String(batches.length)));
             const results = await Promise.allSettled(
               chunk.map(async (batch, bi) => {
                 const batchNum = i + bi + 1;
@@ -531,12 +541,17 @@ export async function runLintWiki(ctx: LintContext, signal?: AbortSignal): Promi
       }
     }
 
-    const prompt = t.lintAnalysisPrompt
-      .replace('{index}', indexContent)
-      .replace('{total}', String(wikiFiles.length))
-      .replace('{sample}', String(samplePages.length))
-      .replace('{contentSample}', contentSample)
-      .replace('{progReport}', progReport || 'No issues detected by programmatic checks.');
+    // Issue #96: honor user's extractionGranularity setting in the LLM
+    // analysis step (was previously unconstrained).
+    const prompt = appendGranularityToPrompt(
+      t.lintAnalysisPrompt
+        .replace('{index}', indexContent)
+        .replace('{total}', String(wikiFiles.length))
+        .replace('{sample}', String(samplePages.length))
+        .replace('{contentSample}', contentSample)
+        .replace('{progReport}', progReport || 'No issues detected by programmatic checks.'),
+      ctx.settings
+    );
 
     stageNotice.setMessage(t.lintAnalyzingLLM);
     checkCancelled();
@@ -579,34 +594,56 @@ export async function runLintWiki(ctx: LintContext, signal?: AbortSignal): Promi
     };
 
     // ---- Build callbacks ----
+
+    // Issue #94 regression: each fix phase is its own lint operation
+    // lifecycle so the status-bar cancel affordance persists throughout
+    // the fix. The modal closes immediately (preserving original UX);
+    // the user gets a top-right progress notice from the fix runner +
+    // the bottom-right status bar for cancellation.
+    const runFixPhase = async (fn: (signal: AbortSignal | undefined) => Promise<void>) => {
+      const signal = ctx.wikiEngine.startLintOperation();
+      try {
+        await fn(signal);
+      } finally {
+        ctx.wikiEngine.endLintOperation();
+      }
+    };
+
     const fixCallbacks: LintFixCallbacks = {};
     fixCallbacks.onAnalyzeSchema = () => { void ctx.onAnalyzeSchema(); };
 
     // Polluted page repair (structural root cause — similar to aliases)
     if (pollutedPages.length > 0) {
       fixCallbacks.onFixPollutedPages = () => {
-        void (async () => {
+        void runFixPhase(async (signal) => {
           let fixed = 0;
           const fixNotice = new Notice('', 0);
-          for (const pp of pollutedPages) {
-            fixNotice.setMessage(`Fixing polluted page ${fixed + 1}/${pollutedPages.length}: ${pp.title} → ${pp.cleanTitle}`);
-            try {
-              const result = await ctx.wikiEngine.fixPollutedPage(pp.path, pp.cleanTitle);
-              console.debug(`[Pollution Fix] ${result}`);
-              fixed++;
-            } catch (e) {
-              console.error(`[Pollution Fix] Failed: ${pp.path}`, e);
+          try {
+            for (const pp of pollutedPages) {
+              if (signal?.aborted) break;
+              fixNotice.setMessage(t.lintFixingPolluted
+                .replace('{current}', String(fixed + 1))
+                .replace('{total}', String(pollutedPages.length))
+                .replace('{title}', pp.title)
+                .replace('{newTitle}', pp.cleanTitle));
+              try {
+                await ctx.wikiEngine.fixPollutedPage(pp.path, pp.cleanTitle);
+                fixed++;
+              } catch (e) {
+                console.error(`[Pollution Fix] Failed: ${pp.path}`, e);
+              }
             }
+            if (fixed > 0) {
+              await ctx.wikiEngine.generateIndexFromEngine();
+            }
+            const msg = getText(ctx.settings.language, 'lintPollutedFixed')
+              .replace('{fixed}', String(fixed))
+              .replace('{total}', String(pollutedPages.length));
+            new Notice(msg, 0);
+          } finally {
+            fixNotice.hide();
           }
-          fixNotice.hide();
-          if (fixed > 0) {
-            await ctx.wikiEngine.generateIndexFromEngine();
-          }
-          const msg = getText(ctx.settings.language, 'lintPollutedFixed')
-            .replace('{fixed}', String(fixed))
-            .replace('{total}', String(pollutedPages.length));
-          new Notice(msg, 0);
-        })();
+        });
       };
     }
 
@@ -628,8 +665,8 @@ export async function runLintWiki(ctx: LintContext, signal?: AbortSignal): Promi
     // Alias completion (runs first — improves duplicate detection for future Lint runs)
     if (aliasDeficientPages.length > 0) {
       fixCallbacks.onCompleteAliases = () => {
-        void (async () => {
-          const { filled, results } = await runAliasCompletion(ctx, aliasDeficientPages);
+        void runFixPhase(async (signal) => {
+          const { filled, results } = await runAliasCompletion(ctx, signal, aliasDeficientPages);
           if (filled > 0) {
             await ctx.wikiEngine.generateIndexFromEngine();
             await ctx.wikiEngine.logLintFix('Complete Aliases', results.join('\n'));
@@ -637,14 +674,14 @@ export async function runLintWiki(ctx: LintContext, signal?: AbortSignal): Promi
           const msg = t.lintAliasesFilled.replace('{filled}', String(filled)).replace('{total}', String(aliasDeficientPages.length))
             + (filled > 0 ? '\n' + t.lintFixIndexUpdated : '');
           new Notice(msg, 0);
-        })();
+        });
       };
     }
 
     if (deadLinks.length > 0) {
       fixCallbacks.onFixDeadLinks = () => {
-        void (async () => {
-          const { fixed, results } = await runDeadLinkFixes(ctx, deadLinks);
+        void runFixPhase(async (signal) => {
+          const { fixed, results } = await runDeadLinkFixes(ctx, signal, deadLinks);
           if (fixed > 0) {
             await ctx.wikiEngine.generateIndexFromEngine();
             await ctx.wikiEngine.logLintFix('Fix Dead Links', results.join('\n'));
@@ -652,14 +689,14 @@ export async function runLintWiki(ctx: LintContext, signal?: AbortSignal): Promi
           const msg = t.lintFixDeadComplete.replace('{fixed}', String(fixed)).replace('{total}', String(deadLinks.length))
             + (fixed > 0 ? '\n' + t.lintFixIndexUpdated : '');
           new Notice(msg, 0);
-        })();
+        });
       };
     }
 
     if (emptyPages.length > 0) {
       fixCallbacks.onFillEmptyPages = () => {
-        void (async () => {
-          const { filled, results } = await runEmptyPageFixes(ctx, emptyPages);
+        void runFixPhase(async (signal) => {
+          const { filled, results } = await runEmptyPageFixes(ctx, signal, emptyPages);
           if (filled > 0) {
             await ctx.wikiEngine.generateIndexFromEngine();
             await ctx.wikiEngine.logLintFix('Expand Empty Pages', results.join('\n'));
@@ -667,14 +704,39 @@ export async function runLintWiki(ctx: LintContext, signal?: AbortSignal): Promi
           const msg = t.lintFillComplete.replace('{filled}', String(filled)).replace('{total}', String(emptyPages.length))
             + (filled > 0 ? '\n' + t.lintFixIndexUpdated : '');
           new Notice(msg, 0);
-        })();
+        });
       };
     }
 
+    // Issue #103: independent delete action (not a fix phase) — always available
+    fixCallbacks.onDeleteEmptyStubs = () => {
+      void runFixPhase(async (signal) => {
+        const result = await ctx.wikiEngine.deleteEmptyStubs(ctx.settings.wikiFolder);
+        if (result.deleted > 0) {
+          await ctx.wikiEngine.generateIndexFromEngine();
+          await ctx.wikiEngine.logLintFix('Delete Empty Stubs', `Deleted ${result.deleted} empty stubs`);
+        }
+        // Issue #244: surface success + failure breakdown to the user.
+        const parts: string[] = [];
+        if (result.deleted > 0) {
+          parts.push(t.lintDeleteCompleted.replace('{count}', String(result.deleted)));
+        }
+        if (result.failed > 0) {
+          parts.push(t.lintDeleteFailed
+            .replace('{failed}', String(result.failed))
+            .replace('{total}', String(result.deleted + result.failed)));
+        }
+        if (parts.length === 0) {
+          parts.push(t.lintDeleteCompleted.replace('{count}', '0'));
+        }
+        new Notice(parts.join('\n'), 0);
+      });
+    };
+
     if (orphans.length > 0) {
       fixCallbacks.onLinkOrphans = () => {
-        void (async () => {
-          const { linked, results } = await runOrphanFixes(ctx, orphans);
+        void runFixPhase(async (signal) => {
+          const { linked, results } = await runOrphanFixes(ctx, signal, orphans);
           if (linked > 0) {
             await ctx.wikiEngine.generateIndexFromEngine();
             await ctx.wikiEngine.logLintFix('Link Orphan Pages', results.join('\n'));
@@ -682,14 +744,14 @@ export async function runLintWiki(ctx: LintContext, signal?: AbortSignal): Promi
           const msg = t.lintLinkComplete.replace('{linked}', String(linked))
             + (linked > 0 ? '\n' + t.lintFixIndexUpdated : '');
           new Notice(msg, 0);
-        })();
+        });
       };
     }
 
     if (duplicates.length > 0) {
       fixCallbacks.onMergeDuplicates = () => {
-        void (async () => {
-          const { merged, results } = await runDuplicateMerges(ctx, duplicates);
+        void runFixPhase(async (signal) => {
+          const { merged, results } = await runDuplicateMerges(ctx, signal, duplicates);
           if (merged > 0) {
             await ctx.wikiEngine.generateIndexFromEngine();
             await ctx.wikiEngine.logLintFix('Merge Duplicate Pages', results.join('\n'));
@@ -697,7 +759,7 @@ export async function runLintWiki(ctx: LintContext, signal?: AbortSignal): Promi
           const msg = t.lintMergeComplete.replace('{merged}', String(merged)).replace('{total}', String(duplicates.length))
             + (merged > 0 ? '\n' + t.lintFixIndexUpdated : '');
           new Notice(msg, 0);
-        })();
+        });
       };
     }
 
@@ -753,7 +815,7 @@ export async function runLintWiki(ctx: LintContext, signal?: AbortSignal): Promi
           // → Missing aliases → duplicate detection misses true duplicates → downstream fixes incomplete
           fixAllNotice.setMessage('Smart fix: Phase 0 — Completing aliases...');
           if (aliasDeficientPages.length > 0) {
-            const { filled, results } = await runAliasCompletion(ctx, aliasDeficientPages);
+            const { filled, results } = await runAliasCompletion(ctx, signal, aliasDeficientPages);
             aliasesFilled = filled;
             if (filled > 0) {
               allResults.push(`## Complete Aliases\n${results.join('\n')}`);
@@ -766,7 +828,7 @@ export async function runLintWiki(ctx: LintContext, signal?: AbortSignal): Promi
           // → Duplicate detection now uses complete aliases (Tier 1 crossLang signals active)
           fixAllNotice.setMessage('Smart fix: Phase 1 — Merging duplicates...');
           if (duplicates.length > 0) {
-            const { merged, results } = await runDuplicateMerges(ctx, duplicates);
+            const { merged, results } = await runDuplicateMerges(ctx, signal, duplicates);
             duplicatesMerged = merged;
             if (merged > 0) {
               allResults.push(`## Merge Duplicate Pages\n${results.join('\n')}`);
@@ -780,7 +842,7 @@ export async function runLintWiki(ctx: LintContext, signal?: AbortSignal): Promi
           // → Dead link fallback uses aliases to find existing pages (avoiding stub creation)
           fixAllNotice.setMessage('Smart fix: Phase 2 — Fixing dead links...');
           if (deadLinks.length > 0) {
-            const { fixed, results } = await runDeadLinkFixes(ctx, deadLinks);
+            const { fixed, results } = await runDeadLinkFixes(ctx, signal, deadLinks);
             deadLinksFixed = fixed;
             if (fixed > 0) {
               allResults.push(`## Fix Dead Links\n${results.join('\n')}`);
@@ -793,7 +855,7 @@ export async function runLintWiki(ctx: LintContext, signal?: AbortSignal): Promi
           // → This phase links any remaining orphan pages
           fixAllNotice.setMessage('Smart fix: Phase 3 — Linking orphan pages...');
           if (orphans.length > 0) {
-            const { linked, results } = await runOrphanFixes(ctx, orphans);
+            const { linked, results } = await runOrphanFixes(ctx, signal, orphans);
             orphansLinked = linked;
             if (linked > 0) {
               allResults.push(`## Link Orphan Pages\n${results.join('\n')}`);
@@ -804,7 +866,7 @@ export async function runLintWiki(ctx: LintContext, signal?: AbortSignal): Promi
           // Phase 4: Expand empty pages (last, independent of other issues)
           fixAllNotice.setMessage('Smart fix: Phase 4 — Expanding empty pages...');
           if (emptyPages.length > 0) {
-            const { filled, results } = await runEmptyPageFixes(ctx, emptyPages);
+            const { filled, results } = await runEmptyPageFixes(ctx, signal, emptyPages);
             emptyPagesFilled = filled;
             if (filled > 0) {
               allResults.push(`## Expand Empty Pages\n${results.join('\n')}`);

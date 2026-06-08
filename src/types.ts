@@ -116,6 +116,11 @@ export interface LLMWikiSettings {
   // LLM readiness — must pass Test Connection before core features are available
   llmReady: boolean;
 
+  // Thinking control probe cache (key = baseUrl). Populated at Test Connection time.
+  // true  → provider accepts thinking.type='disabled'
+  // false → provider returned 400; subsequent calls skip thinking control
+  thinkingControlCache?: Record<string, boolean>;
+
   // Issue #75: cap max_tokens per LLM call. 0 = no cap.
   // Recommended for local models with small context windows.
   maxTokensPerCall: number;
@@ -184,6 +189,7 @@ export interface LLMClient {
     response_format?: { type: 'json_object' };
     cacheBreakpoint?: number;
     maxTokensPerCall?: number;  // Issue #75: cap for truncation retry
+    disableThinking?: boolean;  // ROADMAP P3 #12: disable thinking for thinking-capable models
   }): Promise<string>;
 
   createMessageStream?(params: {
@@ -192,6 +198,7 @@ export interface LLMClient {
     system?: string;
     messages: Array<{role: 'user' | 'assistant'; content: string}>;
     onChunk: (chunk: string) => void;
+    disableThinking?: boolean;
   }): Promise<string>;
 
   listModels?(): Promise<string[]>;

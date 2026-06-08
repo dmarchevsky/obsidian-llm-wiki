@@ -6,13 +6,15 @@
 >
 > **Obsidian-offizielle Bewertung 95/100** | Native Unterstützung für 8 Sprachen | Aktiv gepflegt, kontinuierlich weiterentwickelt
 
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/green-dalii/obsidian-llm-wiki) [![Release Obsidian plugin](https://github.com/green-dalii/obsidian-llm-wiki/actions/workflows/release.yml/badge.svg)](https://github.com/green-dalii/obsidian-llm-wiki/actions/workflows/release.yml) ![Version](https://img.shields.io/github/v/release/green-dalii/obsidian-llm-wiki?style=flat-square) ![Author](https://img.shields.io/badge/author-Greener--Dalii-blue?style=flat-square) ![License](https://img.shields.io/badge/license-MIT-green?style=flat-square) ![Maintenance](https://img.shields.io/badge/maintenance-actively%20maintained-brightgreen?style=flat-square) ![Build Status](https://img.shields.io/github/actions/workflow/status/green-dalii/obsidian-llm-wiki/release.yml?style=flat-square) ![Obsidian Compatibility](https://img.shields.io/badge/obsidian-1.6.6%2B-purple?style=flat-square) ![GitHub Stars](https://img.shields.io/github/stars/green-dalii/obsidian-llm-wiki?style=flat-square) ![Downloads](https://img.shields.io/badge/dynamic/json?logo=obsidian&color=483699&label=downloads&query=$[karpathywiki].downloads&url=https://raw.githubusercontent.com/obsidianmd/obsidian-releases/master/community-plugin-stats.json&style=flat-square) ![Languages](https://img.shields.io/badge/languages-8-informational?style=flat-square) ![Providers](https://img.shields.io/badge/providers-8%2B-cyan?style=flat-square)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/green-dalii/obsidian-llm-wiki) [![Release Obsidian plugin](https://github.com/green-dalii/obsidian-llm-wiki/actions/workflows/release.yml/badge.svg)](https://github.com/green-dalii/obsidian-llm-wiki/actions/workflows/release.yml) ![Version](https://img.shields.io/github/v/release/green-dalii/obsidian-llm-wiki?style=flat-square) ![Author](https://img.shields.io/badge/author-Greener--Dalii-blue?style=flat-square) ![License](https://img.shields.io/badge/license-MIT-green?style=flat-square) ![Maintenance](https://img.shields.io/badge/maintenance-actively%20maintained-brightgreen?style=flat-square) ![Build Status](https://img.shields.io/github/actions/workflow/status/green-dalii/obsidian-llm-wiki/release.yml?style=flat-square) ![Obsidian Compatibility](https://img.shields.io/badge/obsidian-1.6.6%2B-purple?style=flat-square) ![GitHub Stars](https://img.shields.io/github/stars/green-dalii/obsidian-llm-wiki?style=flat-square) ![Downloads](https://img.shields.io/badge/dynamic/json?logo=obsidian&color=483699&label=downloads&query=$[karpathywiki].downloads&url=https://raw.githubusercontent.com/obsidianmd/obsidian-releases/master/community-plugin-stats.json&style=flat-square) ![Languages](https://img.shields.io/badge/languages-8-informational?style=flat-square) ![Providers](https://img.shields.io/badge/providers-12%2B-cyan?style=flat-square)
 
 [English](../README.md) | [中文文档](README_CN.md) | [日本語](README_JA.md) | [한국어](README_KO.md) | [Deutsch](README_DE.md) | [Français](README_FR.md) | [Español](README_ES.md) | [Português](README_PT.md)
 
 [Offizielle Website](https://llmwiki.greenerai.top/) | [Blog](https://llmwiki.greenerai.top/blog/) | [Feedback & Diskussion](https://github.com/green-dalii/obsidian-llm-wiki/discussions) | [🤖 Codebasis mit DeepWiki erkunden](https://deepwiki.com/green-dalii/obsidian-llm-wiki)
 
 ---
+
+> **⚡ Schnellupdate-Hinweis：** Dieses Projekt entwickelt sich rasant weiter – Fehlerbehebungen, Leistungsverbesserungen, neue Funktionen und UX-Optimierungen werden häufig veröffentlicht. Wir empfehlen, in Obsidian regelmäßig zu aktualisieren (**Einstellungen → Community-Plugins → Nach Updates suchen**) oder die automatische Plugin-Aktualisierung zu aktivieren.
 
 ## 📑 Contents
 
@@ -24,7 +26,7 @@
   - [🔑 LLM Provider konfigurieren](#-llm-provider-konfigurieren)
   - [🎮 Nutzung](#-nutzung)
   - [⚠️ Upgrade von einer älteren Version?](#️-upgrade-von-einer-älteren-version)
-- [⚡ Was ist neu in v1.16.1](#-was-ist-neu-in-v1161)
+- [⚡ Was ist neu in v1.16.3](#-was-ist-neu-in-v1163)
 - [✨ Funktionen](#-funktionen)
   - [📊 Knowledge Quality](#-knowledge-quality)
   - [🛠️ Maintenance](#️-maintenance)
@@ -66,151 +68,27 @@ Notizen schreiben. KI organisiert. Fragen stellen. Das ist alles.
 
 ---
 
-## ⚡ Warum Obsidian + LLM Wiki?
+## ⚡ Was ist neu in v1.16.3
 
-Obsidian ist exzellent für vernetztes Denken. Mit einem Nachteil: Sie müssen alle Verknüpfungen manuell erstellen.
+Dieses **Hotfix-Release** schließt die v1.16.2 P0-Bugfix-Batch ab. Die Lint-Abbruch-Statusleisten-Korrektur aus v1.16.2 war unvollständig (das Modal schloss sich unmittelbar nach Klick auf eine Reparaturschaltfläche, wodurch die Statusleiste verschwand, bevor der Nutzer abbrechen konnte), und die fünf Cleanup-Punkte aus der v1.16.2-Review sind jetzt enthalten. **Keine Breaking Changes, keine Neukonfiguration.**
 
-LLM Wiki ändert das. Statt den Graph manuell aufzubauen, wächst die KI mit. Neue Konzept-Notiz hinzufügen — das Plugin findet übersehene Verbindungen. Frage stellen — es durchläuft den eigenen Knowledge Graph und liefert Antworten mit Quellenangaben.
+**Wichtigste Korrekturen:**
 
-- **🔗 Graph-Ansicht wird lebendig.** Neue Notizen verbleiben nicht isoliert — sie sprießen Links zu Entities, Concepts und Sources. Der Graph wächst organisch, das Plugin pflegt ihn: Duplikate erkennen, tote Links reparieren, Sprachen über Aliases verbinden.
-- **💬 Notizen antworten zurück.** Suche wird Gespräch. "Was habe ich über X geschrieben?" wird Dialog mit Streaming-Antworten und `[[wiki-links]]` als Brotkrumen. Jede Antwort führt tiefer in das eigene Wissen.
-- **🧠 Obsidian wird Denkpartner.** Nicht mehr nur Notizenschrank, sondern Hilfe beim *Denken* — versteckte Verbindungen aufzeigen, Widersprüche markieren, Erinnern an Vergessenes.
+- **Lint-Abbruch-Statusleiste funktioniert jetzt wirklich (Issue #94).** v1.16.2 propagierte zwar das AbortSignal zu den Fix-Runnern, aber das Modal schloss sich beim Button-Klick — was onClose → endLintOperation auslöste und die Statusleiste verschwand, bevor der Nutzer abbrechen konnte. Die Korrektur gibt jeder Reparaturphase einen eigenen lint-operation-Lebenszyklus: `startLintOperation` beim Klick auf eine Reparaturschaltfläche, `endLintOperation` nach Abschluss der Reparatur. Das Modal schließt sich sofort (erhält die ursprüngliche UX); der Nutzer sieht oben die Fortschrittsmeldung und unten die Statusleiste dauerhaft während der gesamten Reparatur — Klick zum Abbrechen.
 
----
+- **Fortschrittszähler bei Duplikatprüfung stimmt mit Konsole überein (Issue #94-Folgebug).** Zeigte vorher "1/4" (äußere Runde) statt "1-4/16" (innerer Batch-Bereich). Korrigiert, damit Meldung und Konsolen-Log übereinstimmen — keine Verwechslung des Fortschritts mehr.
 
-## 🚀 Schnellstart
+- **thinkingControlCache-Schlüssel-Korrektur (Issue #243).** Bei vordefinierten Anbietern ohne baseUrl-Überschreibung verwendete das Schreiben einen leeren Schlüssel, das Lesen die vordefinierte URL — der Cache verfehlte für immer und löste bei jedem Aufruf einen verschwendeten 400-Roundtrip aus. Lese- und Schreibpfad verwenden jetzt denselben `getThinkingControlCacheKey()`-Helfer.
 
-### 📦 Installation
+- **deleteEmptyStubs ist jetzt belastbar (Issue #244).** Ein einzelner vault-read- oder deleteFile-Fehler bricht nicht mehr die gesamte Schleife ab. Jede Datei ist unabhängig in try/catch gewickelt, und der Nutzer erhält eine klare Meldung mit Anzahl der gelöschten/fehlgeschlagenen.
 
-**🌟 Empfohlen — Obsidian Community Plugin Market:**
+- **Fallback nach Thinking-Control cached das negative Ergebnis (Issue #245).** `OpenAICompatibleClient` setzt jetzt nach erfolgreichem 400-Fallback `thinkingControlSupported = false`, sodass nachfolgende Aufrufe an dieselbe baseUrl den redundanten Probe-und-Fail-Roundtrip überspringen.
 
-1. In Obsidian zu **Settings → Community plugins** navigieren
-2. **Browse** klicken und "Karpathy LLM Wiki" suchen
-3. **Install** klicken, dann **Enable**
+- **i18n-Bereinigung (Issue #94-Folgebug + #248):** 3 hartkodierte englische Fortschrittsmeldungen durch offizielle i18n-Schlüssel ersetzt (`lintCheckingDuplicatesProgress`, `lintFixingPolluted`, `lintModalFixPolluted`), in 8 Sprachen. Die Thinking-Control-Fehlererkennung verlangt jetzt sowohl einen HTTP-400-Status als auch ein abgelehntes-Feld-Schlüsselwort — passte vorher auf jeden Fehler, der "thinking" enthielt, was zu falschen Fallbacks führte.
 
-**🌐 Alternative — Community Plugin Website:** [community.obsidian.md/plugins/karpathywiki](https://community.obsidian.md/plugins/karpathywiki) besuchen und **Add to Obsidian** für direkte Installation klicken.
+**Upgrade von einer älteren Version?** Keine Breaking Changes, keine Neukonfiguration. Bestehende Wikis, Einstellungen und Workflows bleiben erhalten.
 
-**⚙️ Manuell:**
-
-1. `main.js`, `manifest.json`, `styles.css` von [Releases](https://github.com/green-dalii/obsidian-llm-wiki/releases) herunterladen
-2. In Obsidian zu Settings → Community plugins navigieren. Im Tab **Installed plugins** das Ordner-Icon klicken, um das Plugin-Verzeichnis zu öffnen
-3. Ordner `karpathywiki` erstellen, die drei Dateien darin ablegen
-4. In Obsidian das Refresh-Icon klicken — **Karpathy LLM Wiki** erscheint unter Installed plugins
-5. Toggle auf Enable setzen
-
-**🔨 Entwicklung:** `git clone`, `pnpm install`, `pnpm build`
-
-### 🔄 Plugin aktualisieren
-
-Dieses Projekt entwickelt sich rasch — neue Funktionen, Fehlerbehebungen und Verbesserungen werden häufig veröffentlicht. Wir empfehlen, stets auf dem neuesten Stand zu bleiben:
-
-**Option A — Manuelle Aktualisierung (empfohlen):**
-1. Öffnen Sie **Settings → Community plugins**
-2. Klicken Sie auf **Check for updates**
-3. Finden Sie **Karpathy LLM Wiki** in der Liste und klicken Sie auf **Update**
-
-**Option B — Automatische Aktualisierung aktivieren:**
-1. Öffnen Sie **Settings → Community plugins**
-2. Aktivieren Sie **Automatically check for plugins updates**
-3. Neue Versionen werden automatisch erkannt; aktualisieren Sie nach Bedarf manuell
-
-> 💡 **Warum aktuell bleiben?** Jede Version kann neue Funktionen, Leistungsverbesserungen und wichtige Fehlerbehebungen enthalten. Wir pflegen dieses Plugin aktiv — veraltete Versionen bedeuten, dass Sie Verbesserungen verpassen.
-
-### 🔑 LLM Provider konfigurieren
-
-1. Settings → Karpathy LLM Wiki öffnen
-2. Provider aus dem Dropdown wählen (Anthropic, Anthropic Compatible, Google Gemini, OpenAI, DeepSeek, Kimi, GLM, Ollama, OpenRouter oder Custom)
-3. API-Key eingeben (nicht für Ollama erforderlich)
-4. **Fetch Models** klicken, um das Model-Dropdown zu füllen, oder Model-Namen manuell eingeben
-5. **Test Connection** klicken, dann **Save Settings**
-
-**🦙 Ollama (lokal, kein API-Key):** [Ollama](https://ollama.com) installieren, Model pullen (`ollama pull gemma4`), "Ollama (Local)" im Provider-Dropdown wählen.
-
-### 🎮 Nutzung
-
-| Methode | Vorgehen |
-|---------|----------|
-| **📥 Einzelne Quelle aufnehmen** | `Cmd+P` → "Einzelne Quelle aufnehmen" — eine bestimmte Notiz auswählen, Entitäten und Konzepte als Wiki-Seiten extrahieren |
-| **📂 Aus Ordner aufnehmen** | `Cmd+P` → "Aus Ordner aufnehmen" — Ordner wählen, alle Notizen als Stapel verarbeiten |
-| **🔍 Wiki anfragen** | `Cmd+P` → "Wiki anfragen" — Fragen stellen, Streaming-Antworten mit `[[wiki-links]]` erhalten |
-| **🛠️ Wiki prüfen** | `Cmd+P` → "Wiki prüfen" — Gesundheits-Scan: Duplikate, tote Links, verwaiste Seiten, leere Seiten, fehlende Aliase |
-| **📋 Index neu generieren** | `Cmd+P` → "Index neu generieren" — `wiki/index.md` mit aktuellen Seiten und Aliasen neu aufbauen |
-| **💡 Schema-Aktualisierungen vorschlagen** | `Cmd+P` → "Schema-Aktualisierungen vorschlagen" — LLM analysiert Wiki und schlägt Schema-Verbesserungen vor |
-| **⏹️ Vorgang abbrechen** | `Cmd+P` → "Cancel current ingestion" oder Statusleisten-Klick — sicheres Stoppen an Batch-Grenzen |
-| **🎯 One-Click-Aufnahme** | `sticker` Icon in Seitenleiste oder `Cmd+P` → "Ingest current file" — aktuelle Datei direkt aufnehmen |
-
-Re-Ingesting derselben Source führt zu inkrementellen Updates auf Entity/Concept-Seiten (neue Info wird gemerged). Summary-Seiten werden regeneriert.
-
-**💡 Smart Batch Skip:** Beim Folder-Ingest erkennt das Plugin automatisch bereits verarbeitete Dateien und überspringt diese, um Zeit und API-Kosten zu sparen. Der Batch-Report zeigt die Anzahl übersprungener Dateien.
-
-### ⚠️ Upgrade von einer älteren Version?
-
-**Diese Version ist vollständig abwärtskompatibel.** v1.14.0 enthält keine Breaking Changes — Ihre bestehenden Wiki-Seiten, Einstellungen und Workflows bleiben erhalten. Keine Neukonfiguration oder Datenmigration erforderlich.
-
-**Falls Ihr bestehendes Wiki über viele Versionen hinweg gewachsen ist**, fehlen möglicherweise einige neuere Funktionen (Aliases, alias-bewusste Deduplizierung, modernisierte Prompts). Führen Sie **Lint Wiki** aus, um zu sehen, was Aufmerksamkeit benötigt. Smart Fix All erledigt die häufigsten Aufräumarbeiten mit einem Klick.
-
-**Bei einem Upgrade von einer Version vor v1.14.0** führen Sie einmalig **Lint Wiki** aus, um historische Probleme automatisch zu beheben:
-- **Doppelt verschachtelte Links** `[[[[entities/Foo|Foo]]]]` in log.md — Lint erkennt und behebt diese ohne LLM-Kosten
-- **Cross-Directory-Stub-Duplikate** — Seiten, die mit demselben Slug sowohl in `entities/` als auch in `concepts/` existieren, werden nun korrekt zusammengeführt
-
-**Für Wikis, die über viele Versionen hinweg gewachsen sind**, führen Sie folgende Schritte aus, um Ihr Wiki auf den aktuellen Stand zu bringen:
-
-**1️⃣ Index neu aufbauen**
-`Cmd+P` → **"Index neu generieren"** — Baut `wiki/index.md` mit Alias-Einträgen für jede Seite neu auf. Dies ermöglicht die Alias-basierte Suche (z. B. findet die Suche nach "DSA" die Seite "DeepSeek-Sparse-Attention"). Das alte Index-Format enthielt nur Seitentitel.
-
-**2️⃣ Wiki prüfen ausführen**
-`Cmd+P` → **"Wiki prüfen"** — Durchsucht Ihr gesamtes Wiki und zeigt Folgendes an:
-- **🏷️ Fehlende Aliases**: Seiten ohne Aliases (jede Version, falls Sie „Complete Aliases" nie ausgeführt haben). Klicken Sie **"Complete Aliases"** — der LLM generiert Übersetzungen, Akronyme und alternative Namen im Batch. Dies ist entscheidend für die Duplikaterkennung.
-- **🔄 Doppelte Seiten**: Seiten mit überlappenden Inhalten (z. B. "CoT" vs "Chain-of-Thought", die von älteren Versionen ohne Alias-basierte Deduplizierung erstellt wurden). Klicken Sie **"Merge Duplicates"**, um sie zu verschmelzen und alle Aliases zu erhalten.
-- **💀 Tote Links / Leere Seiten / Orphans**: Übliche Wiki-Wartungsprobleme.
-
-**3️⃣ Smart Fix All verwenden**
-Klicken Sie im Lint-Report auf **"Smart Fix All"** für eine einmalige, kausal geordnete Reparatur: Aliases ergänzen → Duplikate zusammenführen → tote Links reparieren → Orphans verlinken → leere Seiten befüllen. Dies ist der schnellste Weg, ein über mehrere Versionen gewachsenes Wiki zu bereinigen.
-
-**4️⃣ Parallele Seitengenerierung aktivieren**
-Settings → **Ingestion Acceleration**:
-- **⚡ Page Generation Concurrency**: Stellen Sie den Wert auf 3 für die meisten Provider. Beschleunigt die Ingestion um das 2- bis 3-Fache bei Quellen mit 10+ Entities.
-- **⏱️ Batch Delay**: Beginnen Sie bei 300 ms. Erhöhen Sie auf 500–800 ms, wenn Sie auf Rate Limits stoßen.
-
-**5️⃣ Aktuelle Einstellungen prüfen:**
-- **🌐 Wiki Output Language**: Unabhängig von der UI-Sprache — Ihr Wiki kann auf Deutsch sein, während die Plugin-Oberfläche auf Englisch bleibt, oder umgekehrt.
-- **📊 Extraktionsgranularität**: Fünf Optionen steuern, wie tief der LLM Entities aus Quellen extrahiert:
-  - **Fein** (~100 Einträge) — Tiefe Analyse, Randfälle eingeschlossen. Hohe Token-Kosten, ideal für Schlüsselquellen.
-  - **Standard** (~50 Einträge) — Ausgewogene Extraktion. Gute Voreinstellung für tägliche Notizen.
-  - **Groß** (~10 Einträge) — Schneller Überblick, nur Kern-Entities. Niedrige Kosten, schnelle Ingestion.
-  - **Minimal** (~5 Einträge) — Nur wesentliche Einträge. Ideal für Batch-Verarbeitung von 100+ Dateien oder Testen neuer Quellen.
-  - **Benutzerdefiniert** (1–300 Einträge) — Benutzerdefinierte Entity/Concept-Limits für spezielle Workflows.
-  > 💡 **Empfehlung**: Verwenden Sie Minimal oder Groß für große Ordner, um Zeit und API-Kosten zu sparen. Fein nur selektiv für Schlüsseldokumente mit tiefer Analyse.
-- **🔄 Auto-Maintenance**: Optionaler File Watcher, periodischer Lint und Startup Health Check. Standardmäßig alle AUS — nur aktivieren, wenn Sie automatische Hintergrundverarbeitung wünschen.
-
-> **🛡️ Safety**: Parallele Generierung nutzt `Promise.allSettled` — bei Fehler einer Seite laufen andere weiter. Fehlgeschlagene Seiten werden einzeln mit Exponential Backoff wiederholt. Smart Batch Skip erkennt automatisch bereits verarbeitete Dateien und spart so Zeit und API-Kosten.
-
----
----
-
-## ⚡ Was ist neu in v1.16.1
-
-Diese Version ist ein **Stabilitäts- und UX-Hotfix**, der den Anthropic-CORS-Regression behebt und langjährige Lint-Fehlalarme adressiert — keine neuen Funktionen, keine Breaking Changes.
-
-**Hauptfixes:**
-
-- **Anthropic CORS-Regression behoben (Issue #95).** `@anthropic-ai/sdk` (1.3MB) entfernt und `AnthropicClient` auf Obsidians `requestUrl` umgeschrieben. Das interne `fetch` des SDK aus dem `app://obsidian.md`-Origin wurde intermittierend von CORS blockiert — der Community-Standard-Fix, den auch andere LLM-Plugins verwenden. Prompt-Caching (`cache_control: ephemeral`) bleibt durch Senden derselben JSON-Struktur im Raw-Request-Body erhalten.
-
-- **Lint-Fehlalarme behoben (PR #88).** Neues `bodyWordSet()` mit `BODY_STOPWORDS` (45 englische Funktionswörter) filtert sharedLinks-Duplikatkandidaten per Bodytext-Ähnlichkeit (Schwellenwert ≥ 0,2). Behebt den Fall, dass 3+ Seiten, die auf dieselbe Hub-Seite verlinken, trotz unterschiedlichem Inhalt fälschlich als Duplikate markiert wurden. `scanDeadLinks` normalisiert jetzt Leerzeichen→Bindestrich im Target-Basenamen, sodass `[[entities/Claude Code]]` korrekt auf `entities/Claude-Code.md` passt.
-
-- **Lowercase-Slugs + Case-Variant-Erkennung (PR #87).** `computeSlug()` schreibt die Ausgabe jetzt klein, was die Erstellung von Duplikat-Seiten auf case-sensitiven Dateisystemen verhindert. Neues `caseVariant`-Signal in `generateDuplicateCandidates` erkennt Seiten mit kollidierenden Titel-Schreibweisen (z. B. `Unix` vs `unix`) als Tier 1 — keine LLM-Verifizierung nötig.
-
-- **Settings-UX: Hartcodierten Modell-Fallback entfernt.** `defaultModel` aus allen 12 Provider-Konfigurationen entfernt. `DEFAULT_SETTINGS.model: ''` (kein automatisches Befüllen bei Neuinstallation). Beim Provider-Wechsel wird das Modell-Feld geleert — Benutzer muss Modelle abrufen oder manuell eingeben.
-
-- **Settings-UX: Freundliche Fetch-Fehler-Klassifizierung.** Neues `classifyFetchError()` kategorisiert Fehler in `Auth` / `Endpoint` / `Server` / `Empty` / `Network`. Jede Kategorie zeigt eine spezifische Notice mit relevanter Aktion — z. B. „Authentifizierung fehlgeschlagen (HTTP 401/403). Überprüfen Sie den API-Schlüssel, oder geben Sie eine Modell-ID ein und klicken Sie auf Verbindung testen." Manuelle Eingabe wird immer als Fallback erwähnt.
-
-- **Settings-UX: Auto-Switch zu Dropdown bei erfolgreichem Fetch.** Nach erfolgreichem Fetch Models wechselt der Modell-Selektor automatisch vom Text-Eingabefeld zum Dropdown, sodass Benutzer die Liste sofort ohne zusätzlichen Klick sehen.
-
-**Upgrade von einer älteren Version?** Einfach installieren und nutzen — null Breaking Changes, null Neukonfiguration. Bestehende Wikis, Einstellungen und Workflows bleiben erhalten. Das Dropdown-Modell-Feld wird für Benutzer, die zuvor hartcodierte Standardwerte hatten, leer sein, aber ein Klick auf **Fetch Models** füllt es aus der API Ihres Providers.
-
-**Wir empfehlen allen Benutzern dringend ein Upgrade auf diese Version** — der Anthropic-CORS-Fix stellt die Plugin-Funktionalität für Benutzer unter macOS Tahoe und anderen Electron-Versionen wieder her, wo das CORS-Verhalten des SDK zuvor blockiert hatte.
-
----
+**Wir empfehlen allen Nutzern dringend ein Upgrade auf diese Version** — die Lint-Abbruch-Korrektur vervollständigt die Cancel-UX-Story, und die Cache- und Belastbarkeitskorrekturen wirken leise bei jedem Lint-Aufruf.---
 
 ## ✨ Funktionen
 
@@ -229,7 +107,7 @@ Diese Version ist ein **Stabilitäts- und UX-Hotfix**, der den Anthropic-CORS-Re
 - **🎯 Semantic-Tier Duplicate Detection** — Tier 1 (direkte Name-Matches: Cross-Language, Abkürzungen, hochähnliche Titel) immer verifiziert; Tier 2 (indirekte Signale: gemeinsame Links, moderate Ähnlichkeit) füllt Token-Budget
 - **⚡ Smart Fix All** — Kausal geordneter Batch-Fix: Duplikate mergen → tote Links auflösen → Orphans verlinken → leere Pages erweitern
 - **🏷️ Alias Completion** — One-Click parallele Batch-Generierung fehlender Aliases zur Verbesserung zukünftiger Duplikat-Detection
-- **🔄 Auto-Maintenance** — Multi-Folder File Watcher, periodischer Lint, Startup Health Check (alle optional)
+- **🔄 Auto-Maintenance** — Multi-Folder File Watcher, periodischer Lint, Startup Health Check (Startup Quick Fixes standardmäßig AN, File Watcher und Periodic Lint standardmäßig AUS)
 - **⚠️ Contradiction State Machine** — `detected → review_ok → resolved` (AI Fix) oder `detected → pending_fix` (manuell)
 
 ### 💬 Query & Feedback
@@ -240,8 +118,8 @@ Diese Version ist ein **Stabilitäts- und UX-Hotfix**, der den Anthropic-CORS-Re
 
 ### 🌐 LLM & Language
 
-- **🔌 Multi-Provider Support** — Anthropic, Anthropic Compatible, Gemini, OpenAI, DeepSeek, Kimi, GLM, OpenRouter, Ollama, Custom Endpoint
-- **🔄 5xx Auto Retry** — Alle Clients wiederholen bei HTTP 5xx/429/529/529-Fehlern mit Exponential Backoff (max. 2)
+- **🔌 Multi-Provider Support** — Anthropic, Anthropic Compatible, Gemini, OpenAI, DeepSeek, Kimi, GLM, MiniMax, LM Studio, OpenRouter, Ollama, Custom Endpoint
+- **🔄 5xx Auto Retry** — Alle Clients wiederholen bei HTTP 5xx/429/529-Fehlern mit Exponential Backoff (max. 2)
 - **📋 Dynamic Model List** — Echtzeit-Fetch von Provider-API
 - **🌐 Wiki Output Language** — Interface-unabhängige 8 Sprachen (Englisch/Chinesisch/Japanisch/Koreanisch/Deutsch/Französisch/Spanisch/Portugiesisch), Custom Input unterstützt
 - **🌍 Fullständige UI-Internationalisierung** — Plugin UI unterstützt 8 Sprachen (EN/ZH/JA/KO/DE/FR/ES/PT), 269+ UI-Felder vollständig übersetzt, natürliche lokale Ausdrücke
@@ -253,7 +131,7 @@ Diese Version ist ein **Stabilitäts- und UX-Hotfix**, der den Anthropic-CORS-Re
 - **⚡ Parallel Page Generation** — Konfigurierbare 1–5 parallele Pages, Standard 3 (parallel), 2–3× Speedup bei großen Sources, per-Page Error Isolation
 - **📚 Iterative Batch Extraction** — Adaptive Batch-Sizing, eliminiert max_tokens-Bottleneck bei langen Dokumenten
 - **🏛️ Three-Layer Architecture** — `sources/` (read-only) → `wiki/` (LLM-generated) → `schema/` (co-evolved Config)
-- **🧩 Modular Codebase** — 13 fokussierte Module in `src/`
+- **🧩 Modular Codebase** — 20+ fokussierte Module in `src/`
 
 ### 🔒 Datenschutz & Sicherheit
 
@@ -299,7 +177,7 @@ Machine learning uses algorithms to learn from data.
 ```markdown
 ---
 type: entity
-created: 2026-05-15
+created: 2025-12-01
 updated: 2026-05-15
 sources: ["[[sources/machine-learning]]"]
 tags: [method]
@@ -343,16 +221,20 @@ Dieses Plugin folgt Karpathys Kernphilosophie: **den vollen Wiki-Context direkt 
 | **🌟 Preis-Leistung** | **DeepSeek V4-Flash** | 1M tokens | Günstigster Preis ($0.14/M), 284B MoE, ideal für Batch-Ingestion |
 | **🌟 Preis-Leistung** | **Gemini-3.5-Flash** | 1M tokens | 4× schneller als GPT-5.5, exzellent für Agent-Aufgaben |
 | **🌟 Preis-Leistung** | **Qwen3.6-Plus** | 1M tokens | Starke Coding- & Agent-Fähigkeiten, wettbewerbsfähiger Preis |
-| **🌟 Preis-Leistung** | **Grok-4** | 2M tokens | 2M Context, ideal für sehr große Wikis |
+| **🌟 Preis-Leistung** | **Grok-4** | 2M tokens | xAI 2025-07 flagship, 2M context, strong reasoning & code tasks |
 | **Ausgewogen** | **Claude Sonnet 4.6** | 1M tokens | Gute Balance aus Qualität und Kosten, $3/$15 pro Million Tokens |
 | **Leichtgewicht** | **Claude Haiku 4.5** | 200K tokens | Schnell und wirtschaftlich, für kleinere Wikis |
-| **Wirtschaftlich** | **MiMo-V2.5-Flash** | 1M tokens | Xiaomis kosteneffiziente Option, 309B MoE Architektur |
+| **Wirtschaftlich** | **Xiaomi MiMo-V2.5** | 1M tokens | Xiaomi 310B/15B MoE, MIT Open-Source 2026-04, Agent & Multimodal |
 | **Flagship** | Claude Opus 4.7 | 1M tokens | Höchste Qualität, höhere Kosten — selektiv einsetzen |
 | **Flagship** | GPT-5.5 | 1M tokens | Top-Reasoning, höhere Kosten — selektiv einsetzen |
 
 Für lokale Modelle (Ollama): Context Windows normalerweise kleiner (8K–128K), empfohlen wird die Nutzung von Cloud-Providern für Ingestion + lokales Modell für Query.
 
 **🔌 Anthropic Compatible (Coding Plan):** Wenn Ihr Provider einen Anthropic-kompatiblen API-Endpunkt bietet, wählen Sie "Anthropic Compatible" und geben Sie die Base URL und den API Key Ihres Providers ein.
+
+**🦙 Ollama (lokal, kein API-Key):** [Ollama](https://ollama.com) installieren, ein Modell pullen (`ollama pull gemma4` oder `ollama pull qwen3.5:27b`), im Provider-Dropdown "Ollama (Local)" auswählen.
+
+**🎛️ LM Studio (lokal, kein API-Key):** [LM Studio](https://lmstudio.ai) installieren, den lokalen Server starten (Standard `http://localhost:1234/v1`), im Provider-Dropdown "LM Studio (Local)" auswählen. LM Studio betreibt einen eingebauten OpenAI-kompatiblen Server — API-Key-Feld ist optional.
 
 > 💡 **Abonnementpläne:** Coding Plan, OpenAI Pro oder Anthropic Pro sind ausgezeichnete Optionen zur Kostenkontrolle bei häufiger Nutzung. Dieses Plugin unterstützt diese Dienste.
 
@@ -383,6 +265,7 @@ wiki/               # Wiki-Engine-Module
   lint/             # Lint-Submodule
     duplicate-detection.ts  # 🔄 Programmatische Kandidatengenerierung
     fix-runners.ts          # ⚡ Batch-Fix-Ausführungshilfen
+    scanners.ts            # 🔍 Scanners (dead links, orphans, aliases)
   contradictions.ts # ⚠️ Widerspruchs-Erkennung
   system-prompts.ts # 🗣️ Sprach-Direktive + Sektions-Labels
 schema/             # Schema Co-Evolution
@@ -427,18 +310,6 @@ Statusleisten-Text klicken oder Ctrl+P → "Cancel current ingestion". Stoppt si
 Lint Wiki ausführen — der Scanner erkennt und behebt automatisch alle doppelt verschachtelten Wiki-Links im gesamten Wiki-Verzeichnis (einschließlich log.md) ohne LLM-Kosten. Kein manuelles Aufräumen erforderlich.
 
 
-y.
-
-**Warum kann ich nach der Installation keine Funktionen nutzen?**
-Einstellungen → Karpathy LLM Wiki → Provider wählen → API-Key eingeben → Fetch Models → Modell wählen → Test Connection. Grüner "LLM Ready"-Indikator schaltet alle Funktionen frei.
-
-**Wie breche ich eine laufende Aufnahme/Lint ab?**
-Statusleisten-Text klicken oder Ctrl+P → "Cancel current ingestion". Stoppt sicher nach Abschluss des aktuellen Batch.
-
-**Doppelte Klammern [[[[...]]]] in log.md beheben?**
-Lint Wiki ausführen — der Scanner erkennt und behebt automatisch alle doppelt verschachtelten Wiki-Links im gesamten Wiki-Verzeichnis (einschließlich log.md) ohne LLM-Kosten. Kein manuelles Aufräumen erforderlich.
-
-
 **Welches Modell sollte ich wählen?**
 Siehe [Modellempfehlungen](#-modellempfehlungen) oben. Modelle mit langem Kontext werden empfohlen — je größer Ihr Wiki, desto mehr Kontext benötigt der LLM.
 
@@ -452,7 +323,7 @@ Seiten, die vor v1.7.11 generiert wurden, enthielten keine Aliases. Das ist norm
 
 ### ⚡ Wie kann ich die Ingestion für große Quelldateien beschleunigen?
 
-Zwei Einstellungen in **Settings → Ingestion Acceleration**:
+Zwei Einstellungen in **Settings → LLM Configuration**:
 - **🚀 Page Generation Concurrency**: Erhöhen Sie den Wert von 1 auf 3 (oder 5 für Provider mit hohen Rate Limits). Dadurch werden mehrere Entity/Concept-Seiten parallel verarbeitet.
 - **⏱️ Batch Delay**: Niedrigere Werte sind schneller, bergen aber ein Risiko für Rate Limits. Beginnen Sie bei 300 ms; erhöhen Sie auf 500–800 ms, wenn Sie HTTP-429-Fehler sehen.
 
@@ -471,7 +342,7 @@ Ja. Das Plugin respektiert Ihre Bearbeitungen:
 
 ### 🦙 Wie verwende ich lokale Modelle mit Ollama?
 
-1. Installieren Sie [Ollama](https://ollama.com) und pullen Sie ein Modell: `ollama pull gemma4`
+1. Installieren Sie [Ollama](https://ollama.com) und pullen Sie ein Modell: `ollama pull gemma4` oder `ollama pull qwen3.5:27b`
 2. Wählen Sie in den Plugin-Einstellungen **"Ollama (Local)"** als Provider
 3. Klicken Sie **Fetch Models**, um die Modellliste zu füllen, oder geben Sie den Modellnamen manuell ein
 4. Es ist kein API-Key erforderlich
@@ -539,7 +410,7 @@ MIT License — siehe [LICENSE](LICENSE).
 
 - **💡 Konzept:** [Andrej Karpathys LLM Wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) — die ursprüngliche Vision, die dieses Plugin inspiriert hat
 - **🛠️ Plattform:** [Obsidian Plugin API](https://docs.obsidian.md/Plugins/Getting+started/Build+a+plugin)
-- **🔌 LLM SDKs:** Anthropic SDK, OpenAI SDK
+- **🔌 LLM-Transport:** Obsidian `requestUrl` (Anthropic) + OpenAI SDK (3rd-Party OpenAI-kompatible Anbieter)
 
 ---
 

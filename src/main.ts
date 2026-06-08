@@ -11,6 +11,14 @@ import { TOKENS_QUERY_MODEL_DETECT, NOTICE_NORMAL, NOTICE_ERROR } from './consta
 import { AnthropicClient, AnthropicCompatibleClient, OpenAICompatibleClient } from './llm-client';
 import { capMaxTokens } from './core/token-cap';
 
+// Issue #243: derive a consistent cache key for the thinking-control cache.
+// Used in both the read (createLLMClient) and write (testLLMConnection) paths
+// so they stay aligned when the user picks a predefined provider without
+// overriding baseUrl.
+function getThinkingControlCacheKey(settings: LLMWikiSettings): string {
+  return settings.baseUrl?.trim() || PREDEFINED_PROVIDERS[settings.provider]?.baseUrl || '';
+}
+
 function createLLMClient(settings: LLMWikiSettings): LLMClient {
   let client: LLMClient;
 
@@ -30,6 +38,14 @@ function createLLMClient(settings: LLMWikiSettings): LLMClient {
       ? (settings.apiKey.trim() || 'lmstudio')
       : settings.apiKey.trim();
     client = new OpenAICompatibleClient(apiKey, baseUrl);
+  }
+
+  // Sync thinking control cache from settings to client
+  if (client instanceof OpenAICompatibleClient) {
+    const cacheKey = getThinkingControlCacheKey(settings);
+    if (cacheKey && settings.thinkingControlCache?.[cacheKey] !== undefined) {
+      client.thinkingControlSupported = settings.thinkingControlCache[cacheKey];
+    }
   }
 
   // Issue #75: wrap createMessage with token cap when configured
@@ -583,6 +599,46 @@ export default class LLMWikiPlugin extends Plugin {
 
       console.debug('Test response:', testResponse);
       this.settings.llmReady = true;
+
+      // Probe: does this provider accept `thinking: { type: 'disabled' }`?
+      // The result is cached in settings so subsequent LLM calls can avoid a
+      // redundant 400 round-trip. The in-request fallback (retry without
+      // thinking control) handles any mismatch between probe and runtime.
+      if (testClient instanceof OpenAICompatibleClient || testClient instanceof AnthropicCompatibleClient || testClient instanceof AnthropicClient) {
+        try {
+          await testClient.createMessage({
+            model: this.settings.model,
+            max_tokens: 1,
+            messages: [{ role: 'user', content: 'think' }],
+            disableThinking: true,
+          });
+          if (testClient instanceof OpenAICompatibleClient) {
+            testClient.thinkingControlSupported = true;
+          }
+          // Issue #243: skip writing when cacheKey is empty to avoid
+          // polluting the cache with an unusable key.
+          const cacheKey = getThinkingControlCacheKey(this.settings);
+          if (cacheKey) {
+            this.settings.thinkingControlCache = {
+              ...this.settings.thinkingControlCache,
+              [cacheKey]: true,
+            };
+            console.debug('Thinking control supported by', cacheKey);
+          }
+        } catch {
+          if (testClient instanceof OpenAICompatibleClient) {
+            testClient.thinkingControlSupported = false;
+          }
+          const cacheKey = getThinkingControlCacheKey(this.settings);
+          if (cacheKey) {
+            this.settings.thinkingControlCache = {
+              ...this.settings.thinkingControlCache,
+              [cacheKey]: false,
+            };
+            console.debug('Thinking control NOT supported by', cacheKey);
+          }
+        }
+      }
       await this.saveSettings();
 
       // Auto-initialize wiki structure after first successful connection

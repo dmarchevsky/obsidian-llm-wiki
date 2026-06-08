@@ -28,7 +28,7 @@ All four checks must pass before submitting any change:
 
 ```bash
 pnpm lint          # ESLint with Obsidian plugin rules (0 errors, 0 warnings)
-pnpm test          # Vitest unit tests (400 tests, 0 failures)
+pnpm test          # Vitest unit tests (all pass)
 npx tsc --noEmit   # TypeScript type check (0 errors, 0 warnings) — Dual Gate
 pnpm build         # esbuild production build (must exit cleanly)
 ```
@@ -53,12 +53,19 @@ src/
 ├── types.ts             # Shared types + EngineContext
 ├── constants.ts         # Centralized constants (token budgets, notice durations, WIKI_SUBFOLDERS)
 ├── utils.ts             # Utilities (slugify, parseJson, frontmatter parsing)
-├── llm-client.ts        # LLM clients (Anthropic, OpenAI-compatible)
+├── llm-client.ts        # LLM clients (Anthropic via requestUrl, OpenAI-compatible)
 ├── core/                # Pure function modules (zero IO, fully testable)
 │   ├── conflict-resolver.ts    # Conflict detection
 │   ├── dead-link-detector.ts   # Dead link identification
 │   ├── orphan-matcher.ts       # Orphan page matching
-│   └── prompt-builders.ts      # Prompt template builders
+│   ├── prompt-builders.ts      # Prompt template builders
+│   ├── sources-normalizer.ts   # Frontmatter sources field normalization
+│   ├── sse-parser.ts           # Shared SSE event parser
+│   ├── token-cap.ts            # max_tokens cap helper
+│   ├── truncation-retry.ts     # Shared truncation retry policy
+│   ├── batch-limits.ts         # Adaptive batch sizing
+│   ├── batch-merger.ts         # Multi-batch result merging
+│   └── convergence-detector.ts # Early-stop on low-yield batches
 ├── wiki/                # Wiki engine modules
 │   ├── wiki-engine.ts   # Orchestrator (ingest, lint, log)
 │   ├── query-engine.ts  # Conversational query with streaming
@@ -69,12 +76,15 @@ src/
 │   ├── lint-fixes.ts    # Fix logic (dead links, orphans, stubs)
 │   ├── contradictions.ts # Contradiction detection
 │   ├── system-prompts.ts # Language directive + section labels
-│   ├── lint/            # Lint sub-modules (duplicate detection)
+│   ├── lint/            # Lint sub-modules
+│   │   ├── duplicate-detection.ts # Programmatic candidate generation
+│   │   ├── scanners.ts            # Scanners (dead links, orphans, aliases)
+│   │   └── fix-runners.ts         # Batch fix execution helpers
 │   └── prompts/         # LLM prompt templates by domain
 ├── schema/              # Schema co-evolution
 ├── ui/                  # Settings + Modals
 ├── texts/               # i18n (8 languages)
-└── __tests__/           # Unit tests (vitest, 400 tests across 17 files)
+└── __tests__/           # Unit tests (vitest, 549 tests across 18 files)
 ```
 
 ## Internationalization
@@ -85,7 +95,7 @@ src/
 
 ## Testing
 
-Unit tests cover pure utility functions in `src/__tests__/` (400 tests across 17 files). Run with:
+Unit tests cover pure utility functions in `src/__tests__/`. Run with:
 
 ```bash
 pnpm test          # single run
@@ -123,6 +133,7 @@ graph TD
     lint-controller -->|dead links| scanDeadLinks
     lint-controller -->|orphans| scanOrphans
     lint-controller -->|duplicates| generateDuplicateCandidates
+    lint-controller -->|scans| scanners["scanners.ts (scanners.ts)"]
     lint-controller -->|fixes| fix-runners["fix-runners.ts"]
 
     SourceAnalyzer -->|iterative batch| LLMClient

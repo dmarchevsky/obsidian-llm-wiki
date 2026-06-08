@@ -6,7 +6,7 @@
 >
 > **Obsidian 官方评分 95/100** | 原生支持 8 种语言 | 活跃维护，持续进化
 
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/green-dalii/obsidian-llm-wiki) [![Release Obsidian plugin](https://github.com/green-dalii/obsidian-llm-wiki/actions/workflows/release.yml/badge.svg)](https://github.com/green-dalii/obsidian-llm-wiki/actions/workflows/release.yml) ![Version](https://img.shields.io/github/v/release/green-dalii/obsidian-llm-wiki?style=flat-square) ![Author](https://img.shields.io/badge/author-Greener--Dalii-blue?style=flat-square) ![License](https://img.shields.io/badge/license-MIT-green?style=flat-square) ![Maintenance](https://img.shields.io/badge/maintenance-actively%20maintained-brightgreen?style=flat-square) ![Build Status](https://img.shields.io/github/actions/workflow/status/green-dalii/obsidian-llm-wiki/release.yml?style=flat-square) ![Obsidian Compatibility](https://img.shields.io/badge/obsidian-1.6.6%2B-purple?style=flat-square) ![GitHub Stars](https://img.shields.io/github/stars/green-dalii/obsidian-llm-wiki?style=flat-square) ![Downloads](https://img.shields.io/badge/dynamic/json?logo=obsidian&color=483699&label=downloads&query=$[karpathywiki].downloads&url=https://raw.githubusercontent.com/obsidianmd/obsidian-releases/master/community-plugin-stats.json&style=flat-square) ![Languages](https://img.shields.io/badge/languages-8-informational?style=flat-square) ![Providers](https://img.shields.io/badge/providers-8%2B-cyan?style=flat-square)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/green-dalii/obsidian-llm-wiki) [![Release Obsidian plugin](https://github.com/green-dalii/obsidian-llm-wiki/actions/workflows/release.yml/badge.svg)](https://github.com/green-dalii/obsidian-llm-wiki/actions/workflows/release.yml) ![Version](https://img.shields.io/github/v/release/green-dalii/obsidian-llm-wiki?style=flat-square) ![Author](https://img.shields.io/badge/author-Greener--Dalii-blue?style=flat-square) ![License](https://img.shields.io/badge/license-MIT-green?style=flat-square) ![Maintenance](https://img.shields.io/badge/maintenance-actively%20maintained-brightgreen?style=flat-square) ![Build Status](https://img.shields.io/github/actions/workflow/status/green-dalii/obsidian-llm-wiki/release.yml?style=flat-square) ![Obsidian Compatibility](https://img.shields.io/badge/obsidian-1.6.6%2B-purple?style=flat-square) ![GitHub Stars](https://img.shields.io/github/stars/green-dalii/obsidian-llm-wiki?style=flat-square) ![Downloads](https://img.shields.io/badge/dynamic/json?logo=obsidian&color=483699&label=downloads&query=$[karpathywiki].downloads&url=https://raw.githubusercontent.com/obsidianmd/obsidian-releases/master/community-plugin-stats.json&style=flat-square) ![Languages](https://img.shields.io/badge/languages-8-informational?style=flat-square) ![Providers](https://img.shields.io/badge/providers-12%2B-cyan?style=flat-square)
 
 [English](../README.md) | [中文文档](README_CN.md) | [日本語](README_JA.md) | [한국어](README_KO.md) | [Deutsch](README_DE.md) | [Français](README_FR.md) | [Español](README_ES.md) | [Português](README_PT.md)
 
@@ -14,6 +14,7 @@
 
 ---
 
+> **⚡ 快速更新提醒：** 本项目迭代速度快，会经常进行 Bug 修复、性能提升或新功能、体验优化等。建议经常在 Obsidian 中更新到最新版本（**设置 → 社区插件 → 检查更新**），或开启插件的自动更新功能以确保获得最佳体验。
 ## 📑 目录
 
 - [💡 什么是 LLM-Wiki？](#-什么是-llm-wiki)
@@ -24,7 +25,7 @@
   - [🔑 配置 LLM Provider](#-配置-llm-provider)
   - [🎮 使用方式](#-使用方式)
   - [⚠️ 从旧版本升级？](#️-从旧版本升级)
-- [⚡ v1.16.1 更新亮点](#-v1161-更新亮点)
+- [⚡ v1.16.3 更新亮点](#-v1163-更新亮点)
 - [✨ 核心特性](#-核心特性)
   - [📊 知识质量](#-知识质量)
   - [🛠️ 维护能力](#️-维护能力)
@@ -114,12 +115,14 @@ LLM-Wiki 把这个关系翻转了。不是你手工构建图谱，而是 AI 随�
 ### 🔑 配置 LLM Provider
 
 1. 打开 设置 → Karpathy LLM Wiki
-2. 从下拉菜单选择 Provider（Anthropic、Anthropic 兼容、Google Gemini、OpenAI、DeepSeek、Kimi、GLM、Ollama、OpenRouter 或自定义）
+2. 从下拉菜单选择 Provider（Anthropic、Anthropic 兼容、Google Gemini、OpenAI、DeepSeek、Kimi、GLM、MiniMax、LM Studio、Ollama、OpenRouter 或自定义）
 3. 填入 API Key（Ollama 不需要）
 4. 点击 **获取模型列表** 填充模型下拉框，或手动输入模型名
 5. 点击 **测试连接**，然后 **保存设置**
 
-**Ollama 本地模型（无需 API Key）：** 安装 [Ollama](https://ollama.com)，拉取模型（如 `ollama pull qwen3.5:latest`），在 Provider 下拉选择 "Ollama (本地)"。
+**Ollama 本地模型（无需 API Key）：** 安装 [Ollama](https://ollama.com)，拉取模型（如 `ollama pull gemma4` 或 `ollama pull qwen3.5:27b`），在 Provider 下拉选择 "Ollama (本地)"。
+
+**LM Studio 本地模型（无需 API Key）：** 安装 [LM Studio](https://lmstudio.ai)，启动其本地服务（默认 `http://localhost:1234/v1`），在 Provider 下拉选择 "LM Studio（本地）"。LM Studio 内置 OpenAI 兼容服务，API Key 字段可选。
 
 **Anthropic 兼容（Coding Plan）：** 如果你的服务商提供 Anthropic 兼容的 API 端点（常见于 Coding Plan 订阅），选择 "Anthropic 兼容"，填入服务商提供的 Base URL 和 API Key。
 
@@ -142,11 +145,11 @@ LLM-Wiki 把这个关系翻转了。不是你手工构建图谱，而是 AI 随�
 
 ### ⚠️ 从旧版本升级？
 
-**本次发布完全向后兼容。** v1.14.0 不包含任何破坏性变更——你现有的 Wiki 页面、设置和工作流全部保留，无需重新配置或数据迁移。
+**本次发布完全向后兼容。** 自 v1.0.0 起无任何破坏性变更——你现有的 Wiki 页面、设置和工作流全部保留，无需重新配置或数据迁移。
 
 **如果你的现有 Wiki 跨多个版本构建而成**，部分页面可能缺少近期新增的能力（别名、别名感知去重、提示词现代化）。运行 **维护 Wiki (Lint Wiki)** 查看需要处理的项目。**一键智能修复 (Smart Fix All)** 可一站式处理最常见的清理任务。
 
-**如果从 v1.14.0 之前的版本升级**，建议运行一次 **维护 Wiki (Lint Wiki)** 以自动修复以下历史遗留问题：
+**如果从 v1.16.0 之前的版本升级**，建议运行一次 **维护 Wiki (Lint Wiki)** 以自动修复以下历史遗留问题：
 - **双重嵌套链接 `[[[[entities/Foo|Foo]]]]`**：log.md 中可能存在格式异常的链接，Lint 会自动检测并修复，零 LLM 成本
 - **对侧目录重复 stub**：entities/ 和 concepts/ 中同名的重复页面现在能被正确识别并匹配
 
@@ -165,7 +168,7 @@ LLM-Wiki 把这个关系翻转了。不是你手工构建图谱，而是 AI 随�
 在 Lint 报告中点击 **"Smart Fix All"**，按因果关系顺序自动修复：补全别名 → 合并重复 → 修复断链 → 链接孤立页 → 扩充空洞页。这是清理跨版本遗留问题的最快方式。
 
 **4️⃣ 启用并行页面生成**
-设置 → **摄入加速**：
+设置 → **LLM 配置（LLM Configuration）**：
 - **⚡ 页面生成并发度**：大多 Provider 建议设置为 3。含 10+ 实体的源文件可加速 2–3 倍。
 - **⏱️ 批次延迟**：从 300ms 开始。如遇限流请增大至 500–800ms。
 
@@ -178,40 +181,35 @@ LLM-Wiki 把这个关系翻转了。不是你手工构建图谱，而是 AI 随�
   - **极简**（约5个）— 仅核心条目。批量处理 100+ 文件或测试新源文件的首选。
   - **自定义**（1–300个）— 用户自定义实体/概念上限，适配特殊工作流。
   > 💡 **推荐**：批量处理大文件夹时使用极简或粗略以节省时间和 API 成本。精细选项仅选择性用于值得深度分析的关键文档。
-- **🔄 自动维护**：可选的文件监听、定时 Lint、启动健康检查。全部默认关闭——仅在需要后台自动处理时启用。
+- **🔄 自动维护**：可选的文件监听、定时 Lint、启动健康检查。Startup Quick Fixes 默认开启（一次性启动健康检查）；File Watcher 与 Periodic Lint 默认关闭——仅在需要后台自动处理时启用。
 
 > **🛡️ 安全说明**：并行生成使用 `Promise.allSettled` —— 某页失败不影响其他页面继续。失败页面会自动重试并指数退避。智能批量跳过自动检测已摄入文件，节省时间和 API 成本。
 
 ---
----
 
-## ⚡ v1.16.1 更新亮点
+## ⚡ v1.16.3 更新亮点
 
-
-本次更新为**稳定性 + UX 热修复**，修复了 Anthropic CORS 回归和长期存在的 Lint 误报问题——无新功能，无破坏性变更。
+本次为 **热修发布**，补完 v1.16.2 P0 Bug 修复批次。v1.16.2 的 Lint 取消状态栏修复不完整（Modal 在 fix 按钮点击后立即关闭，导致状态栏在用户能取消之前就隐藏了），同时打包了 v1.16.2 review 后的 5 项 cleanup。**零破坏性变更，零重新配置。**
 
 **核心修复：**
 
-- **修复 Anthropic CORS 回归（Issue #95）。** 移除 `@anthropic-ai/sdk`（1.3MB），`AnthropicClient` 重写为基于 Obsidian 的 `requestUrl`。SDK 内部 `fetch` 从 `app://obsidian.md` origin 发起间歇性被 CORS 拦截——这是其他 LLM 插件使用的社区标准方案。Prompt caching（`cache_control: ephemeral`）通过在原始请求体中发送相同 JSON 结构保留。
+- **Lint 取消状态栏现在真正可用（Issue #94）。** v1.16.2 把 AbortSignal 透传到了 fix-runners，但 Modal 仍在按钮点击时关闭——触发 onClose → endLintOperation，导致状态栏在用户能取消前就隐藏。修复方案：每个 fix 阶段使用独立的 lint operation 生命周期——点击 fix 按钮时调用 startLintOperation，fix 完成后调用 endLintOperation。Modal 立即关闭（保留原 UX）；用户看到顶部进度 Notice，底部状态栏在整个 fix 期间持续显示——点击即可取消。
 
-- **Lint 误报修复（PR #88）。** 新增 `bodyWordSet()` 与 `BODY_STOPWORDS`（45 个英文功能词），按正文文本相似度（阈值 ≥ 0.2）筛除 sharedLinks 重复候选。修复了"3+ 页面都链向同一 hub 页面但内容不同"被误判为重复的情况。同时 `scanDeadLinks` 现在对目标 basename 做空格→连字符归一化，使 `[[entities/Claude Code]]` 能正确匹配 `entities/Claude-Code.md`。
+- **重复校验进度显示与控制台一致（Issue #94 后续）。** 之前显示 "1/4"（外层 round 数）而不是 "1-4/16"（内层 batch 范围）。已修复，Notice 和控制台日志现在保持一致——不再混淆进度。
 
-- **小写 slug + 大小写变体检测（PR #87）。** `computeSlug()` 现在小写化输出，避免在大小写敏感文件系统上产生重复页面。新增 `caseVariant` 信号检测大小写碰撞标题（如 `Unix` vs `unix`），作为 Tier 1——无需 LLM 验证。
+- **thinkingControlCache key 修复（Issue #243）。** 使用预定义 provider 但未覆盖 baseUrl 时，cache 写入用空 key，读取用预定义 URL——cache 永远 miss，每次调用都触发一次浪费的 400 往返。读取和写入路径现在使用同一个 `getThinkingControlCacheKey()` helper。
 
-- **设置 UX：移除硬编码模型回退。** 移除所有 12 个提供商配置中的 `defaultModel` 字段。`DEFAULT_SETTINGS.model: ''`（新装不再自动填）。切换 Provider 时清空 model 字段——用户必须获取模型或手动输入。
+- **deleteEmptyStubs 现在有韧性（Issue #244）。** 单个 vault 读或 deleteFile 失败不再中断整个循环。每个文件独立 try/catch，并向用户展示清晰的 Notice 显示 deleted/failed 计数。
 
-- **设置 UX：友好的获取错误分类。** 新增 `classifyFetchError()` 将失败分为 `Auth` / `Endpoint` / `Server` / `Empty` / `Network` 五类。每类显示针对性 Notice——如"认证失败（HTTP 401/403）。请检查 API Key 是否正确，或直接输入模型 ID 后点击测试连接进行验证。"所有路径都提及手动输入作为兜底。
+- **思考控制 fallback 后缓存负结果（Issue #245）。** `OpenAICompatibleClient` 现在在 400 fallback 成功后设置 `thinkingControlSupported = false`，同一 baseUrl 的后续调用跳过冗余的探测-失败往返。
 
-- **设置 UX：获取成功后自动切到下拉。** Fetch Models 成功后，模型选择器自动从输入框切到下拉，用户无需额外点击就能看到模型列表。
+- **i18n 清理（Issue #94 后续 + #248）：** 3 处硬编码英文进度字符串替换为正式的 i18n 键（`lintCheckingDuplicatesProgress`、`lintFixingPolluted`、`lintModalFixPolluted`），覆盖 8 种语言。思考控制错误检测现在需要同时满足 HTTP 400 状态和拒绝字段关键词——之前匹配任何含 "thinking" 的错误，导致假阳性 fallback。
 
-**从旧版本升级？** 直接安装使用——零破坏性变更，零重新配置。既有 Wiki、设置、工作流全部保留。此前硬编码默认值的下拉模型字段将变为空，但点击 **Fetch Models** 即可从你提供商的 API 拉取。
+**从旧版本升级？** 零破坏性变更，零重新配置。既有 Wiki、设置、工作流全部保留。
 
-**强烈建议所有用户升级到该版本**——Anthropic CORS 修复恢复了 macOS Tahoe 及其他 Electron 版本下插件对受影响用户的功能。
-
----
+**强烈建议所有用户升级到该版本**——Lint 取消修复补完了 cancel-UX 故事，cache 和韧性修复在每次 Lint 调用时静默生效。
 
 ---
-
 ## ✨ 核心特性
 
 ### 📊 知识质量
@@ -240,8 +238,8 @@ LLM-Wiki 把这个关系翻转了。不是你手工构建图谱，而是 AI 随�
 
 ### 🌐 LLM 与语言
 
-- **🔌 多 Provider 支持** — Anthropic、Anthropic 兼容（Coding Plan）、Gemini、OpenAI、DeepSeek、Kimi、GLM、OpenRouter、Ollama、自定义接口
-- **🔄 5xx 自动重试** — 全部客户端在 HTTP 5xx/429/529/529 错误时指数退避重试（最多 2 次）
+- **🔌 多 Provider 支持** — Anthropic、Anthropic 兼容（Coding Plan）、Gemini、OpenAI、DeepSeek、Kimi、GLM、MiniMax、LM Studio、OpenRouter、Ollama、自定义接口
+- **🔄 5xx 自动重试** — 全部客户端在 HTTP 5xx/429/529 错误时指数退避重试（最多 2 次）
 - **📋 动态模型列表** — 从 Provider API 实时获取
 - **🌐 Wiki 输出语言** — 8 种语言独立于界面（英/中/日/韩/德/法/西/葡），支持自定义输入
 - **🌍 全界面国际化** — 插件 UI 支持 8 种语言（英/中/日/韩/德/法/西/葡），269+ UI 字段完整翻译，自然本地表达
@@ -253,7 +251,7 @@ LLM-Wiki 把这个关系翻转了。不是你手工构建图谱，而是 AI 随�
 - **⚡ 并行页面生成** — 可配置 1–5 并发页面，默认 3（并行），大源文件 2–3× 加速，单页错误隔离
 - **📚 迭代批量提取** — 自适应批次大小，消除长文档的 max_tokens 瓶颈
 - **🏛️ 三层架构** — `sources/`（只读）→ `wiki/`（LLM 生成）→ `schema/`（共进化配置）
-- **🧩 模块化代码库** — 13 个聚焦模块，位于 `src/`
+- **🧩 模块化代码库** — 20+ 个聚焦模块，位于 `src/`
 
 ### 🔒 隐私与安全
 
@@ -263,10 +261,6 @@ LLM-Wiki 把这个关系翻转了。不是你手工构建图谱，而是 AI 随�
 - **最小化权限。** Vault 文件访问用于 Wiki 管理（阅读笔记、生成页面、检测死链）。网络访问仅用于与你所选提供商的 LLM API 通信。剪贴板访问仅限于 Query 模态框中的"复制"按钮——仅在您点击时使用。
 
 ---
-
-
----
-
 ## ⌨️ 命令列表
 
 | 命令 | 说明 |
@@ -299,7 +293,7 @@ Machine learning uses algorithms to learn from data.
 ```markdown
 ---
 type: entity
-created: 2026-05-15
+created: 2025-12-01
 updated: 2026-05-15
 sources: ["[[sources/machine-learning]]"]
 tags: [method]
@@ -342,10 +336,10 @@ aliases: ["监督学习", "Supervised Learning"]
 | **🌟 性价比首选** | **DeepSeek V4-Flash** | 1M tokens | 最低价($0.14/M)，284B MoE，批量摄入首选 |
 | **🌟 性价比首选** | **Gemini-3.5-Flash** | 1M tokens | 输出速度比 GPT-5.5 快 4 倍，智能体任务出色 |
 | **🌟 性价比首选** | **Qwen3.6-Plus** | 1M tokens | 编码和智能体能力强劲，价格有竞争力 |
-| **🌟 性价比首选** | **Grok-4** | 2M tokens | 2M 超长上下文，超大型 Wiki 首选 |
+| **🌟 性价比首选** | **Grok-4** | 2M tokens | xAI 2025-07 flagship, 2M context, strong reasoning & code tasks |
 | **均衡型** | **Claude Sonnet 4.6** | 1M tokens | 质量与成本平衡佳，$3/$15 每百万 token |
 | **轻量型** | **Claude Haiku 4.5** | 200K tokens | 快速经济，适合小型 Wiki |
-| **经济型** | **MiMo-V2.5-Flash** | 1M tokens | 小米高性价比选择，309B MoE 架构 |
+| **经济型** | **Xiaomi MiMo-V2.5** | 1M tokens | 小米 310B/15B MoE，2026-04 MIT 开源，Agent 与多模态 |
 | **旗舰型** | Claude Opus 4.7 | 1M tokens | 极致质量，成本较高 — 选择性使用 |
 | **旗舰型** | GPT-5.5 | 1M tokens | 顶级推理，成本较高 — 选择性使用 |
 
@@ -382,6 +376,7 @@ wiki/               # Wiki 引擎模块
   lint/             # Lint 子模块
     duplicate-detection.ts  # 🔄 程序化候选生成
     fix-runners.ts          # ⚡ 批量修复执行
+    scanners.ts            # 🔍 扫描器（死链/孤立/别名）
   contradictions.ts # ⚠️ 矛盾检测
   system-prompts.ts # 🗣️ 语言指令 + 章节标签
 schema/             # Schema 共进化
@@ -436,7 +431,7 @@ v1.7.10 之前没有别名感知的重复检测。运行 **Lint Wiki** → **Mer
 ### ⚡ 性能与成本
 
 **如何加速摄入？**
-在 **设置 → 摄入加速** 中：增加**页面生成并发度**到 3–5（并行创建页面），降低**批次延迟**到 100–300ms（注意限流风险）。选择"极简"、"粗略"或"标准"的**提取粒度**可减少产出的页面数量并节省 API 成本。
+在 **设置 → LLM 配置** 中：增加**页面生成并发度**到 3–5（并行创建页面），降低**批次延迟**到 100–300ms（注意限流风险）。选择"极简"、"粗略"或"标准"的**提取粒度**可减少产出的页面数量并节省 API 成本。
 
 **为什么遇到 HTTP 429 错误？**
 插件会自动检测限流模式并建议：降低并发度到 1–2，增大批次延迟到 500–800ms，或切换到更高限额的 Provider。
@@ -513,4 +508,4 @@ MIT License — 详见 [LICENSE](LICENSE)。
 
 - **💡 概念来源：** [Andrej Karpathy 的 LLM Wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) — 本插件的原始构想
 - **🛠️ 开发平台：** [Obsidian Plugin API](https://docs.obsidian.md/Plugins/Getting+started/Build+a+plugin)
-- **🔌 LLM SDK：** Anthropic SDK、OpenAI SDK
+- **🔌 LLM 传输层：** Obsidian `requestUrl`（Anthropic）+ OpenAI SDK（其他 OpenAI 兼容 Provider）
