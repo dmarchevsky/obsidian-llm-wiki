@@ -21,6 +21,20 @@ function checkCancelled(signal: AbortSignal | undefined): void {
   }
 }
 
+// Returns a Notice-like object whose setMessage() also mirrors the text to the
+// status bar. Keeps popup and status bar in sync without manual updateStatusBar
+// calls at every progress site.
+export function makeMirroredNotice(ctx: LintContext): { setMessage: (msg: string) => void; hide: () => void } {
+  const notice = new Notice('', 0);
+  return {
+    setMessage(msg: string) {
+      notice.setMessage(msg);
+      ctx.wikiEngine.updateStatusBar(msg);
+    },
+    hide() { notice.hide(); }
+  };
+}
+
 export async function runAliasCompletion(
   ctx: LintContext,
   signal: AbortSignal | undefined,
@@ -37,7 +51,7 @@ export async function runAliasCompletion(
 
   let filled = 0;
   const results: string[] = [];
-  const fixNotice = new Notice('', 0);
+  const fixNotice = makeMirroredNotice(ctx);
   const aliasStartTime = Date.now();
   const aliasFailures: Array<{ name: string; reason: string }> = [];
 
@@ -157,7 +171,7 @@ export async function runDeadLinkFixes(
   });
   let fixed = 0;
   const results: string[] = [];
-  const fixNotice = new Notice('', 0);
+  const fixNotice = makeMirroredNotice(ctx);
   try {
     for (let i = 0; i < unique.length; i++) {
       checkCancelled(signal);
@@ -195,7 +209,7 @@ export async function runEmptyPageFixes(
   const t = TEXTS[ctx.settings.language];
   let filled = 0;
   const results: string[] = [];
-  const fixNotice = new Notice('', 0);
+  const fixNotice = makeMirroredNotice(ctx);
   try {
     for (let i = 0; i < emptyPages.length; i++) {
       checkCancelled(signal);
@@ -226,7 +240,7 @@ export async function runOrphanFixes(
   checkCancelled(signal);
   const t = TEXTS[ctx.settings.language];
   const results: string[] = [];
-  const fixNotice = new Notice('', 0);
+  const fixNotice = makeMirroredNotice(ctx);
   try {
     for (let i = 0; i < orphans.length; i++) {
       checkCancelled(signal);
@@ -262,7 +276,7 @@ export async function runDuplicateMerges(
   const t = TEXTS[ctx.settings.language];
   let merged = 0;
   const results: string[] = [];
-  const fixNotice = new Notice('', 0);
+  const fixNotice = makeMirroredNotice(ctx);
   try {
     for (let i = 0; i < duplicates.length; i++) {
       checkCancelled(signal);
@@ -295,7 +309,7 @@ export async function runCaseNormalizationFixes(
   let fixed = 0;
   const results: string[] = [];
   const total = merges.length + renames.length;
-  const fixNotice = new Notice('', 0);
+  const fixNotice = makeMirroredNotice(ctx);
 
   for (let i = 0; i < merges.length; i++) {
     const { target, source } = merges[i];
