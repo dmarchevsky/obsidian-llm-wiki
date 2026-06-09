@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { generateDuplicateCandidates, bodyWordSet, computeJaccard } from '../wiki/lint/duplicate-detection';
+import { generateDuplicateCandidates, bodyWordSet, computeJaccard } from '../../../wiki/lint/duplicate-detection';
 
 function makePage(path: string, body: string, links: string[] = []) {
   const linksText = links.map(l => `[[${l}]]`).join('\n');
