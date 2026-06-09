@@ -12,7 +12,7 @@ import { TOKENS_LINT_DEDUP_LLM, NOTICE_NORMAL, NOTICE_RATE_LIMIT } from '../cons
 import { isPageEmpty, detectPollutedPages, fixDoubleNestedWikiLinks, getExistingWikiPages } from './lint-fixes';
 import { fixPollutedSources, scanPollutedSources } from '../core/sources-normalizer';
 import { generateDuplicateCandidates, DuplicateCandidate } from './lint/duplicate-detection';
-import { runAliasCompletion, runDeadLinkFixes, runEmptyPageFixes, runOrphanFixes, runDuplicateMerges, runCaseNormalizationFixes } from './lint/fix-runners';
+import { runAliasCompletion, runDeadLinkFixes, runEmptyPageFixes, runOrphanFixes, runDuplicateMerges, runCaseNormalizationFixes, makeMirroredNotice } from './lint/fix-runners';
 import { buildKnownTargets, detectAliasDeficiency, scanDeadLinks, scanOrphans, detectUppercasePageNames } from './lint/scanners';
 import { WikiEngine } from './wiki-engine';
 import { insertWikiLinks } from '../core/wikilink-inserter';
@@ -95,8 +95,14 @@ export async function runLintWiki(ctx: LintContext, signal?: AbortSignal): Promi
 
     const totalPages = wikiFiles.length;
     const BATCH_READ = 200;
+    ctx.wikiEngine.updateStatusBar(getText(ctx.settings.language, 'lintStatusReading')
+      .replace('{current}', '0')
+      .replace('{total}', String(totalPages)));
     for (let i = 0; i < wikiFiles.length; i += BATCH_READ) {
       checkCancelled();
+      ctx.wikiEngine.updateStatusBar(getText(ctx.settings.language, 'lintStatusReading')
+        .replace('{current}', String(Math.min(i + BATCH_READ, totalPages)))
+        .replace('{total}', String(totalPages)));
       const batch = wikiFiles.slice(i, i + BATCH_READ);
       const batchResults = await Promise.all(
         batch.map(async file => {
@@ -178,6 +184,9 @@ export async function runLintWiki(ctx: LintContext, signal?: AbortSignal): Promi
       f.path.includes('/entities/') || f.path.includes('/concepts/')
     );
     if (entityConceptFiles.length >= 2 && ctx.llmClient) {
+      ctx.wikiEngine.updateStatusBar(getText(ctx.settings.language, 'lintStatusDuplicates')
+        .replace('{current}', '…')
+        .replace('{total}', '…'));
       stageNotice.setMessage(t.lintCheckingDuplicates);
       try {
         const pagesForDedup: Array<{ path: string; content: string; title: string }> = [];
@@ -263,7 +272,11 @@ export async function runLintWiki(ctx: LintContext, signal?: AbortSignal): Promi
               ? `${batchStart}-${batchEnd}/${batches.length}`
               : `${batchStart}/${batches.length}`;
             stageNotice.setMessage(t.lintCheckingDuplicatesProgress
-              .replace('{current}', progressLabel));
+              .replace('{current}', progressLabel)
+              .replace('{total}', String(batches.length)));
+            ctx.wikiEngine.updateStatusBar(getText(ctx.settings.language, 'lintStatusDuplicates')
+              .replace('{current}', progressLabel)
+              .replace('{total}', String(batches.length)));
             const results = await Promise.allSettled(
               chunk.map(async (batch, bi) => {
                 const batchNum = i + bi + 1;
@@ -330,6 +343,7 @@ export async function runLintWiki(ctx: LintContext, signal?: AbortSignal): Promi
     }
 
     // Dead links
+    ctx.wikiEngine.updateStatusBar(getText(ctx.settings.language, 'lintStatusScanningLinks'));
     stageNotice.setMessage(t.lintScanningLinks);
     console.debug('lintWiki: scanning dead links');
     const deadLinks = scanDeadLinks(pageMap, knownTargets, knownTargetsLower, ctx.settings.wikiFolder);
@@ -554,6 +568,7 @@ export async function runLintWiki(ctx: LintContext, signal?: AbortSignal): Promi
       ctx.settings
     );
 
+    ctx.wikiEngine.updateStatusBar(getText(ctx.settings.language, 'lintStatusAnalyzing'));
     stageNotice.setMessage(t.lintAnalyzingLLM);
     checkCancelled();
     const llmReport = await ctx.llmClient.createMessage({
@@ -618,7 +633,7 @@ export async function runLintWiki(ctx: LintContext, signal?: AbortSignal): Promi
       fixCallbacks.onFixPollutedPages = () => {
         void runFixPhase(async (signal) => {
           let fixed = 0;
-          const fixNotice = new Notice('', 0);
+          const fixNotice = makeMirroredNotice(ctx);
           try {
             for (const pp of pollutedPages) {
               if (signal?.aborted) break;
@@ -651,7 +666,7 @@ export async function runLintWiki(ctx: LintContext, signal?: AbortSignal): Promi
     // Case-variant normalization (Phase -2 root cause — renames uppercase pages before all else)
     if (caseVariantMerges.length > 0 || caseVariantRenames.length > 0) {
       fixCallbacks.onNormalizeCaseVariants = () => {
-        void (async () => {
+        void runFixPhase(async (_signal) => {
           const { fixed, results } = await runCaseNormalizationFixes(ctx, caseVariantMerges, caseVariantRenames);
           if (fixed > 0) {
             await ctx.wikiEngine.generateIndexFromEngine();
@@ -659,7 +674,7 @@ export async function runLintWiki(ctx: LintContext, signal?: AbortSignal): Promi
           }
           const total = caseVariantMerges.length + caseVariantRenames.length;
           new Notice(`Normalized ${fixed}/${total} uppercase page name(s)` + (fixed > 0 ? '\n' + t.lintFixIndexUpdated : ''), 0);
-        })();
+        });
       };
     }
 
@@ -769,9 +784,9 @@ export async function runLintWiki(ctx: LintContext, signal?: AbortSignal): Promi
     const totalFixableIncludingAliases = totalFixable + aliasDeficientPages.length + pollutedPages.length + caseVariantTotal;
     if (totalFixableIncludingAliases > 0) {
       fixCallbacks.onFixAll = () => {
-        void (async () => {
+        return runFixPhase(async (signal) => {
           const allResults: string[] = [];
-          const fixAllNotice = new Notice('', 0);
+          const fixAllNotice = makeMirroredNotice(ctx);
 
           // Track per-phase counts for final summary
           let caseNormFixed = 0;
@@ -942,7 +957,7 @@ export async function runLintWiki(ctx: LintContext, signal?: AbortSignal): Promi
             });
           }
           new FixReportModal(ctx.app, phases, ctx.settings.language).open();
-        })();
+        });
       };
     }
 
@@ -951,7 +966,7 @@ export async function runLintWiki(ctx: LintContext, signal?: AbortSignal): Promi
     await ctx.wikiEngine.logLintFix(t.lintReportTitle, fullReport);
     if (ctx.settings.autoSmartFix && fixCallbacks.onFixAll) {
       new Notice(getText(ctx.settings.language, 'autoSmartFixNotice'));
-      fixCallbacks.onFixAll();
+      await fixCallbacks.onFixAll();
     } else {
       new LintReportModal(ctx.app, fullReport, fixCallbacks, counts, ctx.settings.language).open();
     }
