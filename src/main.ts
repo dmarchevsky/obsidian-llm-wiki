@@ -64,7 +64,7 @@ function createLLMClient(settings: LLMWikiSettings): LLMClient {
   return client;
 }
 import { TEXTS } from './texts';
-import { slugify, parseFrontmatter, getText } from './utils';
+import { slugify, parseFrontmatter, getText, normalizeVocabularyCsv } from './utils';
 import { LLMWikiSettingTab } from './ui/settings';
 import { WikiEngine } from './wiki/wiki-engine';
 import { QueryModal } from './wiki/query-engine';
@@ -84,6 +84,7 @@ export default class LLMWikiPlugin extends Plugin {
 
   async onload() {
     await this.loadSettings();
+    this.cleanupVocabularyTags();
     this.initializeLLMClient();
 
     this.schemaManager = new SchemaManager(
@@ -276,6 +277,31 @@ export default class LLMWikiPlugin extends Plugin {
     }
   }
 
+  /**
+   * Issue #85 v2: Migrate v1 textarea CSV (which may contain untrimmed
+   * whitespace, empty entries, or case-variant duplicates from manual
+   * editing) into the canonical form the chip input uses. Idempotent.
+   * Called once on onload() before any UI renders so users see clean
+   * chips immediately on first reload after upgrade.
+   */
+  private cleanupVocabularyTags(): void {
+    const fields: ('customEntityTags' | 'customConceptTags')[] = [
+      'customEntityTags',
+      'customConceptTags',
+    ];
+    let changed = false;
+    for (const field of fields) {
+      const current = this.settings[field];
+      if (!current) continue;
+      const cleaned = normalizeVocabularyCsv(current);
+      if (cleaned !== current) {
+        this.settings[field] = cleaned;
+        changed = true;
+      }
+    }
+    if (changed) void this.saveSettings();
+  }
+
   async saveSettings() {
     console.debug('saveSettings: watchedFolders =', JSON.stringify(this.settings.watchedFolders));
     await this.saveData(this.settings);
@@ -334,7 +360,7 @@ export default class LLMWikiPlugin extends Plugin {
   // ==================== Ingestion ====================
 
   private async isAlreadyIngested(sourceFile: TFile): Promise<boolean> {
-    const slug = slugify(sourceFile.basename);
+    const slug = slugify(sourceFile.basename, this.settings.slugCase === 'preserve');
     const wikiPath = `${this.settings.wikiFolder}/sources/${slug}.md`;
 
     try {

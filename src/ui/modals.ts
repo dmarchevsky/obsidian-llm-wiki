@@ -77,6 +77,7 @@ export interface LintFixCallbacks {
   onFixAll?: () => Promise<void>;
   onFixPollutedPages?: () => void;
   onNormalizeCaseVariants?: () => void;
+  onRetagViolations?: () => void;
 }
 
 export interface LintCounts {
@@ -88,6 +89,7 @@ export interface LintCounts {
   pollutedPages: number;
   caseVariantDuplicates: number;
   uppercasePageNames: number;
+  tagViolations: number;
 }
 
 export class LintReportModal extends Modal {
@@ -150,6 +152,20 @@ export class LintReportModal extends Modal {
       });
       btn.addEventListener('click', () => {
         this.fixCallbacks.onCompleteAliases?.();
+        this.close();
+      });
+    }
+
+    // === Layer 1.5: Issue #85 v7 — Tag violation retag (LLM bulk) ===
+    if (this.counts.tagViolations > 0 && this.fixCallbacks.onRetagViolations) {
+      const row = actionSection.createDiv({ attr: { style: 'margin-bottom: 10px;' } });
+      const btn = row.createEl('button', {
+        text: t.lintTagViolationRetagBtn.replace('{count}', String(this.counts.tagViolations)),
+        cls: 'mod-cta',
+        attr: { style: 'font-weight: bold;' }
+      });
+      btn.addEventListener('click', () => {
+        this.fixCallbacks.onRetagViolations?.();
         this.close();
       });
     }

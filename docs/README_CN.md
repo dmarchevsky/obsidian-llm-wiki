@@ -6,7 +6,7 @@
 >
 > **Obsidian 官方评分 95/100** | 原生支持 8 种语言 | 活跃维护，持续进化
 
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/green-dalii/obsidian-llm-wiki) [![Release Obsidian plugin](https://github.com/green-dalii/obsidian-llm-wiki/actions/workflows/release.yml/badge.svg)](https://github.com/green-dalii/obsidian-llm-wiki/actions/workflows/release.yml) ![Version](https://img.shields.io/github/v/release/green-dalii/obsidian-llm-wiki?style=flat-square) ![Author](https://img.shields.io/badge/author-Greener--Dalii-blue?style=flat-square) ![License](https://img.shields.io/badge/license-MIT-green?style=flat-square) ![Maintenance](https://img.shields.io/badge/maintenance-actively%20maintained-brightgreen?style=flat-square) ![Build Status](https://img.shields.io/github/actions/workflow/status/green-dalii/obsidian-llm-wiki/release.yml?style=flat-square) ![Obsidian Compatibility](https://img.shields.io/badge/obsidian-1.6.6%2B-purple?style=flat-square) ![GitHub Stars](https://img.shields.io/github/stars/green-dalii/obsidian-llm-wiki?style=flat-square) ![Downloads](https://img.shields.io/badge/dynamic/json?logo=obsidian&color=483699&label=downloads&query=$[karpathywiki].downloads&url=https://raw.githubusercontent.com/obsidianmd/obsidian-releases/master/community-plugin-stats.json&style=flat-square) ![Languages](https://img.shields.io/badge/languages-8-informational?style=flat-square) ![Providers](https://img.shields.io/badge/providers-12%2B-cyan?style=flat-square)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/green-dalii/obsidian-llm-wiki) [![Release Obsidian plugin](https://github.com/green-dalii/obsidian-llm-wiki/actions/workflows/release.yml/badge.svg)](https://github.com/green-dalii/obsidian-llm-wiki/actions/workflows/release.yml) ![Version](https://img.shields.io/github/v/release/green-dalii/obsidian-llm-wiki?style=flat-square) ![Author](https://img.shields.io/badge/author-Greener--Dalii-blue?style=flat-square) ![License](https://img.shields.io/badge/license-MIT-green?style=flat-square) ![Maintenance](https://img.shields.io/badge/maintenance-actively%20maintained-brightgreen?style=flat-square) ![Build Status](https://img.shields.io/github/actions/workflow/status/green-dalii/obsidian-llm-wiki/release.yml?style=flat-square) ![Obsidian Compatibility](https://img.shields.io/badge/obsidian-1.11.0%2B-purple?style=flat-square) ![GitHub Stars](https://img.shields.io/github/stars/green-dalii/obsidian-llm-wiki?style=flat-square) ![Downloads](https://img.shields.io/badge/dynamic/json?logo=obsidian&color=483699&label=downloads&query=$[karpathywiki].downloads&url=https://raw.githubusercontent.com/obsidianmd/obsidian-releases/master/community-plugin-stats.json&style=flat-square) ![Languages](https://img.shields.io/badge/languages-8-informational?style=flat-square) ![Providers](https://img.shields.io/badge/providers-12%2B-cyan?style=flat-square)
 
 [English](../README.md) | [中文文档](README_CN.md) | [日本語](README_JA.md) | [한국어](README_KO.md) | [Deutsch](README_DE.md) | [Français](README_FR.md) | [Español](README_ES.md) | [Português](README_PT.md)
 
@@ -25,7 +25,7 @@
   - [🔑 配置 LLM Provider](#-配置-llm-provider)
   - [🎮 使用方式](#-使用方式)
   - [⚠️ 从旧版本升级？](#️-从旧版本升级)
-- [⚡ v1.17.0 更新亮点](#-v1170-更新亮点)
+- [⚡ v1.18.1 更新亮点](#-v1181-更新亮点)
 - [✨ 核心特性](#-核心特性)
   - [📊 知识质量](#-知识质量)
   - [🛠️ 维护能力](#️-维护能力)
@@ -187,28 +187,41 @@ LLM-Wiki 把这个关系翻转了。不是你手工构建图谱，而是 AI 随�
 
 ---
 
-## ⚡ v1.17.0 更新亮点
+## ⚡ v1.18.1 更新亮点
 
-本次为 **质量大版本**，摄入能力显著提升。关闭了 1 个已跟踪 Issue (#90)。最关键的：之前根本无法摄入的超长文档现在可以正常工作，且生成内容携带更丰富的来源归属。**零破坏性变更，零重新配置。**
+v1.18.1 是一个 **PATCH 热修复**，解决了 Obsidian 社区插件源码审查的合规性问题。v1.18.0 在源码审查阶段被拒绝，原因是生产代码中出现了 `document`（裸全局变量）以及针对 `obsidianmd/prefer-active-doc` 的 `eslint-disable` 注释——两者在 Obsidian 审查流程中均被禁止。本次热修复移除了 `document` 回退逻辑和所有相关的 eslint-disable 注释；`activeDocument` 的 stub 已集中到测试 setup 中。对用户无任何可见行为变化。
 
-**Highlights:**
+- **🛡️ Obsidian 审查合规。** 生产代码现在只使用 `activeDocument`（Obsidian 弹窗窗口感知的文档引用）。jsdom 测试环境通过 `setup.ts` 中的集中式 stub 获取 `activeDocument`，使测试和生产关注点清晰分离。
 
-- **长文档摄入现已真正可用。** 619KB 的中文源文件（如《史记》）以前根本无法处理——自定义粒度的批次大小硬编码为最多 15 个 items（无论你设多少上限），且 `max_tokens` 上限低于大 batch 实际所需。现在 `customEntityLimit` 和 `customConceptLimit` 真正驱动批次管线（1-500，默认各 5），`max_tokens` 随批次大小动态缩放（20K-60K），截断时自动减半 batchSize 重试。之前 3 分钟、15 items 就失败的同份长文档，现在能完整摄入并提取数百个实体和概念。
+**所有 v1.18.0 功能保持不变。** 如果你已经在使用 v1.18.0，本次热修复没有新功能需要你采纳。
 
-- **Mentions 现在带来源归属（学术注释风格）。** 实体页和概念页的"Mentions in Source"部分以前是无追溯的自由格式引用块。现在每条引用以学术注释形式呈现：`- "原文（可选翻译）" — [[源文件路径|显示名]]`。每条引用都可链接回其来源，未来页面合并时不会混淆不同来源的内容。
+**强烈建议所有用户升级到本版本。** 本次热修复确保插件通过 Obsidian 的自动化源码审查，并在社区插件市场上正常可用。
 
-- **自定义粒度上限从 300 提升至 500**，支持专业领域知识库（法律、医学、深度研究）。
+**关闭：** v1.18.0 源码审查拒绝。
 
-**Other Fixes & Improvements:**
+## ⚡ v1.18.0 更新亮点
 
-- **Provider 设置现已全链路同步。** 之前在设置中切换 Provider/API Key/Model 不会传播到 wiki engine，导致后续 Ingest/Lint/Query 静默使用旧 Provider。修复方案：新增 `wikiEngine.updateSettings()` 保持 EngineContext 与 live settings 同步。测试连接按钮失败时也不再保存已损坏的配置。
-- **日期由程序生成，不再由 LLM 生成。** Source 页面中 LLM 幻觉的 `created`/`updated` 日期（如 2025 出现在 2026-06-08 的摄入中）会被剥离并由系统覆盖。合并时 `created` 保留，`updated` 始终为今天。
-- **Lint 报告现已持久化到 log.md**，时间戳精确到分钟，区分同一天内的多次 Lint 运行。Lint 报告 Modal 显示 `📋 完整报告已保存至 log.md` 提示。
-- **Source 页面继承源文件 frontmatter 的 tags（Issue #90）。** 之前 LLM 会注入任意概念名（如 Alzheimer-Demenz、Neuroprotektion），污染用户的 tag 词汇表。现在 `tags` 由系统程序化继承自源文件 frontmatter。
-- **测试连接失败时恢复 live settings。** 之前测试失败会用测试的损坏配置覆盖已保存的配置。现在测试失败会恢复原 settings。
-- **Folder 摄入早期返回时恢复 callback。** `setDoneCallback` 现在在 folder 摄入无新文件时正确恢复，后续摄入使用正确的 callback。
+v1.18.0 是面向用户可自定义标签词汇表（Issue #85）的**重大功能发布**，完整闭环从 UI、prompt 注入、到程序化审计和 LLM 辅助修复。同时包含 thinking-token 回归的完整修复（Issue #99 v2）、保护用户编辑页面的 reviewed-guard，以及基于跨学科分析的默认词汇表更新。
 
-**强烈建议所有用户升级到本版本。** 长文档摄入是本次最关键改进——如果你曾遇到大源文件 400 报错或只提取少量 items，本版本完全修复。来源归属和日期完整性提升适用于你生成的每一页。
+**核心亮点：**
+
+- **🎯 用户可配置标签词汇表（Issue #85）。** 现在你可以在设置 → Wiki 配置 → Tag Vocabulary 中自定义实体/概念的标签词汇表。两种模式：**Default**（内置）或 **Custom**（芯片输入——Enter 添加/× 删除）。词汇表会注入到每个 LLM prompt 中，让模型输出匹配的类型，而非发明自己的。
+
+- **🔍 Lint 标签审计 + LLM 重标。** Lint 现在扫描每个页面，检查是否有超出活跃词汇表的标签。新增"🏷️ 以 LLM 重标 N 个页面"按钮，将违规页面发送给 LLM 配合你的活跃词汇表重新标记——告别每次摄取后的手动标签修正。
+
+- **🧠 默认词汇表更新。** 实体 `location` → `place`。概念新增 `field`（学科）、`phenomenon`（现象）、`standard`（规范）；移除 `technology`（跨类型模糊）。来源移除 `document`（与 `article` 重叠）。完全向后兼容——移除的标签在现有页面中保留，Lint 标记提醒可选重标。
+
+- **🛡️ reviewed-guard。** `enforceFrontmatterConstraints` 现在尊重 `fm.reviewed: true`——用户编辑过的页面会保留其标签（包括故意清空 `tags: []`）。仅 LLM 生成的假日期仍会被剥离。
+
+- **🧠 disableThinking 默认开启（Issue #99 v2）。** v1.16.2 的防 thinking 防御不完整——`disableThinking` 参数已存在但零个生产 `createMessage` 调用传递了它。v1.18.0 将其传播到全部 22 个调用点。默认开启，用户可在设置中配置。
+
+- **🔌 AnthropicClient 针对 thinking-mandatory 模型的回退。** Claude Fable 5 / Mythos 5 拒绝 `thinking.type='disabled'` 返回 400。两个 Anthropic 客户端现在捕获错误、缓存 provider 为不支持、并在无 thinking 字段时重试。
+
+- **⬆️ minAppVersion 从 1.6.6 提升至 1.11.0。** 使用 Obsidian <1.11.0 的用户必须升级才能继续使用本版本。原因：芯片输入 UI 需要 `Setting.addComponent()` API。
+
+**强烈建议所有用户升级到本版本。** 标签词汇表管道是核心功能——如果你一直在每次摄取后手动修正 LLM 生成的标签，本版本将彻底消除这一工作。`disableThinking` 修复防止了 Gemma 4、DeepSeek-R1 等会思考模型的中间推理污染。**注意：** 本版本将最低 Obsidian 要求从 v1.6.6 提升至 v1.11.0——使用旧版本的用户必须在更新插件前升级 Obsidian。
+
+**关闭：** #85（用户可配置标签词汇表），#99（Thinking-token 回归——完整修复）。
 ## ✨ 核心特性
 
 ### 📊 知识质量
@@ -408,7 +421,7 @@ ui/                 # 用户界面
 你放入笔记，它提取人物、概念和理论，生成互联的 Wiki 页面，带 `[[双向链接]]`。你可以提问，从*你的*笔记中获取答案——而不是互联网的幻觉。
 
 **最低要求？**
-Obsidian v1.6.6+，桌面端（Windows/macOS/Linux），LLM Provider API Key。Ollama 本地运行无需 API Key。参见上方 [配置 LLM Provider](#🔑-配置-llm-provider)。
+Obsidian v1.11.0+，桌面端（Windows/macOS/Linux），LLM Provider API Key。Ollama 本地运行无需 API Key。参见上方 [配置 LLM Provider](#🔑-配置-llm-provider)。
 
 **该选哪个模型？**
 参见上方的 [模型选择建议](#-模型选择建议)。推荐长上下文模型——Wiki 越大，LLM 需要更多上下文。

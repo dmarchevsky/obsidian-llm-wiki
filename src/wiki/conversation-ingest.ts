@@ -122,7 +122,7 @@ Output JSON format:
   "entities": [
     {
       "name": "Short Reference Name",
-      "type": "person|organization|project|other",
+      "type": "person|organization|project|product|event|place|other",
       "summary": "Entity information summary",
       "mentions_in_source": ["Specific mentions in conversation"]
     }
@@ -130,7 +130,7 @@ Output JSON format:
   "concepts": [
     {
       "name": "Concept Name",
-      "type": "theory|method|technology|term|other",
+      "type": "theory|method|field|phenomenon|standard|term|other",
       "summary": "Concept definition",
       "mentions_in_source": ["Specific mentions in conversation"],
       "related_concepts": ["Related Concept 1", "Related Concept 2"]
@@ -157,7 +157,8 @@ CRITICAL RULES:
         role: 'user',
         content: analysisPrompt
       }],
-      response_format: { type: 'json_object' }
+      response_format: { type: 'json_object' },
+      disableThinking: this.ctx.settings.disableThinking,
     });
 
     const parsed = await parseJsonResponse(analysis, async (malformedJson: string) => {
@@ -167,7 +168,8 @@ CRITICAL RULES:
         max_tokens: TOKENS_PAGE_GENERATION,
         system: await this.ctx.buildSystemPrompt('conversation'),
         messages: [{ role: 'user', content: repairPrompt }],
-        response_format: { type: 'json_object' }
+        response_format: { type: 'json_object' },
+        disableThinking: this.ctx.settings.disableThinking,
       });
     }) as SourceAnalysis | null;
     if (!parsed) {
@@ -180,17 +182,18 @@ CRITICAL RULES:
     this.ctx.onProgress?.('Creating summary page...');
     await this.orch.ensureWikiStructure();
 
-    const semanticSlug = slugify(parsed.source_title);
+    const preserveCase = this.ctx.settings.slugCase === 'preserve';
+    const semanticSlug = slugify(parsed.source_title, preserveCase);
     const summaryPath = `${this.ctx.settings.wikiFolder}/sources/${semanticSlug}.md`;
     console.debug('[Semantic file path]', summaryPath);
 
     // Build planned paths before summary so the LLM can reference them
     const convPlannedPaths: string[] = [summaryPath];
     for (const entity of parsed.entities) {
-      convPlannedPaths.push(`${this.ctx.settings.wikiFolder}/entities/${slugify(entity.name)}.md`);
+      convPlannedPaths.push(`${this.ctx.settings.wikiFolder}/entities/${slugify(entity.name, preserveCase)}.md`);
     }
     for (const concept of parsed.concepts) {
-      convPlannedPaths.push(`${this.ctx.settings.wikiFolder}/concepts/${slugify(concept.name)}.md`);
+      convPlannedPaths.push(`${this.ctx.settings.wikiFolder}/concepts/${slugify(concept.name, preserveCase)}.md`);
     }
 
     const createdPagesList = convPlannedPaths.length > 0
@@ -220,7 +223,8 @@ CRITICAL RULES:
       model: this.ctx.settings.model,
       max_tokens: TOKENS_CONVERSATION_PAGE,
       system: await this.ctx.buildSystemPrompt('summary'),
-      messages: [{ role: 'user', content: finalSummaryPrompt }]
+      messages: [{ role: 'user', content: finalSummaryPrompt }],
+      disableThinking: this.ctx.settings.disableThinking,
     });
 
     const cleanedSummary = cleanMarkdownResponse(summaryPageContent);
@@ -308,7 +312,8 @@ CRITICAL RULES:
       max_tokens: TOKENS_QUERY_SAVE_DEDUP,
       system: await this.ctx.buildSystemPrompt('conversation'),
       messages: [{ role: 'user', content: prompt }],
-      response_format: { type: 'json_object' }
+      response_format: { type: 'json_object' },
+      disableThinking: this.ctx.settings.disableThinking,
     });
 
     const parsed = await parseJsonResponse(response) as { status?: string } | null;

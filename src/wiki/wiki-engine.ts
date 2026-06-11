@@ -318,11 +318,12 @@ export class WikiEngine {
       });
 
       const plannedPaths: string[] = [];
+      const preserveCase = this.settings.slugCase === 'preserve';
       for (const entity of analysis.entities) {
-        plannedPaths.push(normalizePath(`${this.settings.wikiFolder}/entities/${slugify(entity.name)}.md`));
+        plannedPaths.push(normalizePath(`${this.settings.wikiFolder}/entities/${slugify(entity.name, preserveCase)}.md`));
       }
       for (const concept of analysis.concepts) {
-        plannedPaths.push(normalizePath(`${this.settings.wikiFolder}/concepts/${slugify(concept.name)}.md`));
+        plannedPaths.push(normalizePath(`${this.settings.wikiFolder}/concepts/${slugify(concept.name, preserveCase)}.md`));
       }
 
       // Stage 1.5: Pre-create stubs for frequently co-mentioned related items.
@@ -773,17 +774,29 @@ export class WikiEngine {
   }
 
   async createSummaryPage(file: TFile, analysis: SourceAnalysis, plannedPaths: string[] = []): Promise<string> {
-    const slug = slugify(file.basename);
+    const preserveCase = this.settings.slugCase === 'preserve';
+    const slug = slugify(file.basename, preserveCase);
     const path = normalizePath(`${this.settings.wikiFolder}/sources/${slug}.md`);
     const content = await this.app.vault.read(file);
+
+    // Issue #114: if the source page already exists with manually-set tags,
+    // preserve them — re-ingesting a note must not overwrite corrections.
+    // Priority: existing source-page tags > source-note tags > LLM concept names.
+    const existingSource = await this.tryReadFile(path);
+    const existingFm = existingSource ? parseFrontmatter(existingSource) : null;
+    const existingTags = Array.isArray(existingFm?.tags) && existingFm.tags.length > 0
+      ? existingFm.tags
+      : null;
 
     // Issue #90: inherit tags from source note frontmatter when available,
     // so the generated summary page doesn't pollute the tag vocabulary with
     // LLM-derived concept names. Fallback to LLM-derived tags if source has none.
     const sourceTags = extractSourceTags(content);
-    const tagsValue = sourceTags.length > 0
-      ? sourceTags.join(', ')
-      : analysis.concepts.map(c => c.name).join(', ');
+    const tagsValue = existingTags
+      ? existingTags.join(', ')
+      : sourceTags.length > 0
+        ? sourceTags.join(', ')
+        : analysis.concepts.map(c => c.name).join(', ');
 
     const createdPagesList = plannedPaths.length > 0
       ? plannedPaths.map(p => {
@@ -791,9 +804,9 @@ export class WikiEngine {
           const name = relPath.split('/').pop() || relPath;
           return `- [[${relPath}|${name}]]`;
         }).join('\n')
-      : analysis.entities.map(e => `- [[entities/${slugify(e.name)}|${e.name}]]`).join('\n') +
+      : analysis.entities.map(e => `- [[entities/${slugify(e.name, preserveCase)}|${e.name}]]`).join('\n') +
         '\n' +
-        analysis.concepts.map(c => `- [[concepts/${slugify(c.name)}|${c.name}]]`).join('\n');
+        analysis.concepts.map(c => `- [[concepts/${slugify(c.name, preserveCase)}|${c.name}]]`).join('\n');
 
     const prompt = PROMPTS.generateSummaryPage
       .replace('{{source_title}}', analysis.source_title)
@@ -811,7 +824,8 @@ export class WikiEngine {
       model: this.settings.model,
       max_tokens: TOKENS_PAGE_GENERATION,
       system: await this.buildSystemPrompt('summary'),
-      messages: [{ role: 'user', content: finalPrompt }]
+      messages: [{ role: 'user', content: finalPrompt }],
+      disableThinking: this.settings.disableThinking,
     });
 
     const cleanedContent = cleanMarkdownResponse(pageContent);
@@ -1176,7 +1190,34 @@ export class WikiEngine {
     const time = now.toTimeString().slice(0, 5); // HH:MM
     const lang = this.settings.wikiLanguage || 'en';
     const entry = `\n\n## [${date} ${time}] ${operation}\n\n${details}\n`;
-    const existingLog = await this.tryReadFile(logPath) || `# Wiki ${lang === 'zh' ? '操作日志' : 'Operation Log'}\n\n`;
-    await this.createOrUpdateFile(logPath, existingLog + entry);
+    try {
+      let existingLog = await this.tryReadFile(logPath);
+      if (!existingLog) {
+        existingLog = `# Wiki ${lang === 'zh' ? '操作日志' : 'Operation Log'}\n\n`;
+      }
+      // Cap the existing log at a reasonable size to avoid Obsidian choking on
+      // a multi-megabyte file. If existingLog + entry would exceed MAX_LOG_BYTES,
+      // trim from the front while preserving the header.
+      const MAX_LOG_BYTES = 512 * 1024; // 512 KB
+      const projectedSize = (existingLog.length + entry.length) * 2; // UTF-16 estimate
+      if (projectedSize > MAX_LOG_BYTES) {
+        const headerEnd = existingLog.indexOf('\n\n');
+        const header = headerEnd > 0 ? existingLog.substring(0, headerEnd + 2) : '# Wiki Operation Log\n\n';
+        // Keep the most recent portion
+        const keepBytes = MAX_LOG_BYTES / 2;
+        const trimmed = existingLog.substring(existingLog.length - keepBytes);
+        // Find next H2 boundary so we don't cut mid-entry
+        const h2Idx = trimmed.indexOf('\n## ');
+        existingLog = header + (h2Idx > 0 ? trimmed.substring(h2Idx + 1) : trimmed);
+        console.warn(`[logLintFix] ${logPath} exceeded ${MAX_LOG_BYTES} bytes; trimmed oldest entries`);
+      }
+      await this.createOrUpdateFile(logPath, existingLog + entry);
+    } catch (e) {
+      // Issue: log persistence failures were silently swallowed before, leaving
+      // the user wondering why the modal showed but log.md didn't update.
+      // Now log the error AND the path so the user can diagnose from console.
+      console.error(`[logLintFix] failed to write ${logPath}:`, e);
+      throw e; // re-throw so callers (e.g. runLintWiki) can surface the failure
+    }
   }
 }

@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { buildKnownTargets, detectAliasDeficiency, scanDeadLinks, scanOrphans, detectUppercasePageNames, ScannerPage } from '../../../wiki/lint/scanners';
+import { buildKnownTargets, detectAliasDeficiency, scanDeadLinks, scanOrphans, detectUppercasePageNames, scanTagViolations, ScannerPage } from '../../../wiki/lint/scanners';
+import { LLMWikiSettings } from '../../../types';
 
 // ── buildKnownTargets ─────────────────────────────────────────
 
@@ -235,5 +236,159 @@ describe('detectUppercasePageNames', () => {
     expect(result.renames).toHaveLength(2);
     expect(result.renames.map(r => r.newBasename).sort()).toEqual(['deeplearning', 'schema']);
     expect(result.merges).toHaveLength(0);
+  });
+});
+
+// ── scanTagViolations (Issue #85 v7) ────────────────────────────
+
+describe('scanTagViolations', () => {
+  const baseSettings: LLMWikiSettings = {
+    provider: 'anthropic', apiKey: '', baseUrl: '', model: 'claude-sonnet-4-6',
+    wikiFolder: 'wiki', language: 'en', wikiLanguage: 'en',
+    maxConversationHistory: 30, extractionGranularity: 'standard',
+    enableSchema: true, autoWatchSources: false, autoWatchMode: 'notify',
+    autoWatchDebounceMs: 5000, watchedFolders: [], periodicLint: 'off',
+    startupCheck: false, autoSmartFix: false, pageGenerationConcurrency: 3, batchDelayMs: 500,
+    copySourcePagesToWiki: false, pagesFolder: 'pages',
+    llmReady: false,
+    maxTokensPerCall: 0,
+    tagVocabularyMode: 'default',
+    customEntityTags: '',
+    customConceptTags: '',
+    slugCase: 'lower' as const,
+  };
+
+  function makeEntityPage(path: string, tags: string[] | string, withTitle = false): ScannerPage {
+    const titleLine = withTitle ? `title: Test\n` : '';
+    return {
+      path,
+      content: `---\ntype: entity\n${titleLine}tags: ${Array.isArray(tags) ? `[${tags.join(', ')}]` : tags}\n---\n\nBody`,
+      basename: path.split('/').pop() || '',
+    };
+  }
+
+  function makeConceptPage(path: string, tags: string[]): ScannerPage {
+    return {
+      path,
+      content: `---\ntype: concept\ntags: [${tags.join(', ')}]\n---\n\nBody`,
+      basename: path.split('/').pop() || '',
+    };
+  }
+
+  function makeSourcePage(path: string, tags: string[]): ScannerPage {
+    return {
+      path,
+      content: `---\ntype: source\ntags: [${tags.join(', ')}]\n---\n\nBody`,
+      basename: path.split('/').pop() || '',
+    };
+  }
+
+  it('returns empty when pageMap is empty', () => {
+    expect(scanTagViolations(new Map(), baseSettings)).toEqual([]);
+  });
+
+  it('returns empty when all entity tags are within default vocab', () => {
+    const pm = new Map<string, ScannerPage>([
+      ['wiki/entities/Alice.md', makeEntityPage('Alice.md', ['person'])],
+      ['wiki/entities/Acme.md', makeEntityPage('Acme.md', ['organization'])],
+    ]);
+    expect(scanTagViolations(pm, baseSettings)).toEqual([]);
+  });
+
+  it('flags an entity page with an out-of-vocab tag', () => {
+    const pm = new Map<string, ScannerPage>([
+      ['wiki/entities/Alice.md', makeEntityPage('Alice.md', ['person', 'bogus', 'Medical_Arzneimittel'])],
+    ]);
+    const result = scanTagViolations(pm, baseSettings);
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({
+      path: 'wiki/entities/Alice.md',
+      pageType: 'entity',
+      currentTags: ['person', 'bogus', 'Medical_Arzneimittel'],
+      invalidTags: ['bogus', 'Medical_Arzneimittel'],
+    });
+  });
+
+  it('honors custom entity vocabulary in custom mode', () => {
+    const customSettings: LLMWikiSettings = { ...baseSettings,
+      tagVocabularyMode: 'custom',
+      customEntityTags: 'person, organization, Medical_Arzneimittel',
+    };
+    const pm = new Map<string, ScannerPage>([
+      // "project" is in DEFAULT but NOT in the user's custom vocab →
+      // should be flagged.
+      ['wiki/entities/Alice.md', makeEntityPage('Alice.md', ['person', 'project'])],
+    ]);
+    const result = scanTagViolations(pm, customSettings);
+    expect(result).toHaveLength(1);
+    expect(result[0].invalidTags).toEqual(['project']);
+  });
+
+  it('flags a concept page with a default-vocab-but-not-concept tag', () => {
+    // "person" is in VALID_ENTITY_TAGS but NOT VALID_CONCEPT_TAGS.
+    const pm = new Map<string, ScannerPage>([
+      ['wiki/concepts/ML.md', makeConceptPage('ML.md', ['theory', 'person'])],
+    ]);
+    const result = scanTagViolations(pm, baseSettings);
+    expect(result).toHaveLength(1);
+    expect(result[0].invalidTags).toEqual(['person']);
+  });
+
+  it('flags a source page with non-VALID_SOURCE_TAGS tag', () => {
+    // "Medical_Arzneimittel" is a custom entity tag, NOT a source
+    // "form" tag → must be flagged.
+    const pm = new Map<string, ScannerPage>([
+      ['wiki/sources/Smith2024.md', makeSourcePage('Smith2024.md', ['Medical_Arzneimittel', 'paper'])],
+    ]);
+    const result = scanTagViolations(pm, baseSettings);
+    expect(result).toHaveLength(1);
+    expect(result[0].invalidTags).toEqual(['Medical_Arzneimittel']);
+  });
+
+  it('passes a source page with valid form tags', () => {
+    const pm = new Map<string, ScannerPage>([
+      ['wiki/sources/Clippings.md', makeSourcePage('Clippings.md', ['clippings', 'article'])],
+    ]);
+    expect(scanTagViolations(pm, baseSettings)).toEqual([]);
+  });
+
+  it('does not flag pages with empty tags array', () => {
+    const pm = new Map<string, ScannerPage>([
+      ['wiki/entities/Empty.md', makeEntityPage('Empty.md', [])],
+    ]);
+    expect(scanTagViolations(pm, baseSettings)).toEqual([]);
+  });
+
+  it('skips pages whose type is not entity / concept / source', () => {
+    const pm = new Map<string, ScannerPage>([
+      ['wiki/overviews/Index.md', {
+        path: 'wiki/overviews/Index.md',
+        content: '---\ntype: overview\ntags: [bogus, invalid]\n---\n\nBody',
+        basename: 'Index.md',
+      }],
+    ]);
+    expect(scanTagViolations(pm, baseSettings)).toEqual([]);
+  });
+
+  it('returns results sorted by path', () => {
+    const pm = new Map<string, ScannerPage>([
+      ['wiki/entities/Z.md', makeEntityPage('Z.md', ['bogus'])],
+      ['wiki/entities/A.md', makeEntityPage('A.md', ['bogus'])],
+      ['wiki/entities/M.md', makeEntityPage('M.md', ['bogus'])],
+    ]);
+    const result = scanTagViolations(pm, baseSettings);
+    expect(result.map(v => v.path)).toEqual([
+      'wiki/entities/A.md',
+      'wiki/entities/M.md',
+      'wiki/entities/Z.md',
+    ]);
+  });
+
+  it('captures page title from frontmatter (used in Lint report)', () => {
+    const pm = new Map<string, ScannerPage>([
+      ['wiki/entities/Alice.md', makeEntityPage('Alice.md', ['bogus'], true)],
+    ]);
+    const result = scanTagViolations(pm, baseSettings);
+    expect(result[0].title).toBe('Test');
   });
 });

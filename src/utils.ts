@@ -1,6 +1,6 @@
 // Utility functions for Wiki processing
 
-import { VALID_ENTITY_TAGS, VALID_CONCEPT_TAGS } from './types';
+import { VALID_ENTITY_TAGS, VALID_CONCEPT_TAGS, VALID_SOURCE_TAGS, LLMWikiSettings } from './types';
 import { TEXTS } from './texts';
 
 // Type-safe i18n accessor. Falls back to EN_TEXTS when key is missing in target language.
@@ -22,7 +22,7 @@ export function getText<K extends keyof typeof TEXTS.en>(
   return text;
 }
 
-export function slugify(text: string): string {
+export function slugify(text: string, preserveCase = false): string {
   console.debug('slugify input:', text, 'length:', text?.length);
 
   if (!text || text.trim().length === 0) {
@@ -30,14 +30,15 @@ export function slugify(text: string): string {
     return 'untitled';
   }
 
-  return computeSlug(text);
+  return computeSlug(text, preserveCase);
 }
 
-// Pure slug computation — no debug logs. Used for batch operations like
-// matchExtractedToExisting where thousands of slugify calls would flood the log.
 // Pure slug computation — no debug logs on normal path. Used for batch operations
 // where thousands of silent calls are needed (e.g. matching 2141 existing pages).
-export function computeSlug(text: string): string {
+// preserveCase skips the final toLowerCase() for file creation (Issue #111).
+// All comparison/matching callers must NOT pass preserveCase so slugs stay
+// case-insensitively comparable regardless of the user's slugCase setting.
+export function computeSlug(text: string, preserveCase = false): string {
   if (!text || text.trim().length === 0) return 'untitled';
 
   const trimmed = text.trim();
@@ -62,7 +63,7 @@ export function computeSlug(text: string): string {
 
   if (finalSlug.length === 0) return 'untitled-' + Date.now();
 
-  return finalSlug.toLowerCase();
+  return preserveCase ? finalSlug : finalSlug.toLowerCase();
 }
 
 // Filter out aliases that are redundant against a page's own filename.
@@ -554,8 +555,13 @@ export function mergeFrontmatter(
     lines.push(`sources:${yamlStringify(mergedSources)}`);
   }
 
+  // Always emit tags: so the field is never silently dropped on merge.
+  // An empty tags: is preferable to a missing field — it signals that tags
+  // need to be set, rather than hiding the gap entirely (Issue #114).
   if (Array.isArray(fm.tags) && fm.tags.length > 0) {
     lines.push(`tags:${yamlStringify(fm.tags)}`);
+  } else {
+    lines.push('tags:');
   }
 
   if (fm.reviewed) {
@@ -686,13 +692,38 @@ export function cleanMarkdownResponse(response: string): string {
  *
  * This is a safety net in case LLM doesn't follow the prompt instructions.
  */
-export function enforceFrontmatterConstraints(content: string, pageType: 'entity' | 'concept' | 'source'): string {
+export function enforceFrontmatterConstraints(
+  content: string,
+  pageType: 'entity' | 'concept' | 'source',
+  settings?: LLMWikiSettings
+): string {
   if (!content.startsWith('---')) return content;
 
   const fmEnd = content.indexOf('\n---\n', 3);
   if (fmEnd === -1) return content;
 
   const fmText = content.substring(3, fmEnd);
+
+  // Reviewed-guard (D4 design): when the page is marked `reviewed: true`
+  // by the user, their intent for type / tags / aliases wins. The
+  // function below is a safety net for LLM output, but the user has
+  // explicitly accepted the current frontmatter — we must not silently
+  // overwrite their choices (especially an empty `tags: []` they may
+  // have intentionally set). Only programmatic safety nets still run:
+  // LLM-hallucinated dates are stripped because the date system is
+  // strictly programmatic, not user-authored.
+  //
+  // This aligns with the rest of the codebase:
+  //   - lint-fixes.ts:439 skips reviewed pages
+  //   - page-factory.ts:288/308 use minimal append on reviewed pages
+  //   - prompts/generation.ts:206-241 has a dedicated preserveReviewed prompt
+  if (/^reviewed:\s*true\s*$/m.test(fmText)) {
+    const today = new Date().toISOString().split('T')[0];
+    return content
+      .replace(/^created:\s*\d{4}-\d{2}-\d{2}\s*$/m, `created: ${today}`)
+      .replace(/^updated:\s*\d{4}-\d{2}-\d{2}\s*$/m, `updated: ${today}`);
+  }
+
   let body = content.substring(fmEnd + 5);
 
   const today = new Date().toISOString().split('T')[0];
@@ -796,20 +827,53 @@ export function enforceFrontmatterConstraints(content: string, pageType: 'entity
 
   // Add tags line
   if (foundTags || collectedTags.length > 0) {
-    // Validate against schema-defined subtype ranges
-    const validSubtypes = pageType === 'entity'
-      ? VALID_ENTITY_TAGS
+    // Validate against the active vocabulary (Issue #85: user-configurable).
+    // Default vocabulary is hardcoded VALID_*_TAGS; custom vocabulary comes
+    // from settings.customEntityTags / customConceptTags. Falls back to default
+    // when settings is omitted or when the mode is not 'custom'.
+    //
+    // Issue #85 v6: preserve LLM intent — keep ALL LLM-emitted tags in
+    // the frontmatter. Tags inside the active vocabulary are accepted
+    // outright; tags outside it are still written (the user can edit
+    // them or expand their vocabulary later) but are flagged in
+    // console.debug so the divergence is visible. Previously the
+    // validator silently dropped out-of-vocab tags, which erased
+    // legitimate LLM output when the user's vocabulary was too narrow.
+    // Issue #85 v7: source pages now go through the same validation
+    // pipeline as entity/concept, against the static VALID_SOURCE_TAGS
+    // taxonomy (paper / document / article / …).
+    const validSubtypes: readonly string[] = pageType === 'entity'
+      ? (settings ? getActiveEntityTags(settings) : VALID_ENTITY_TAGS)
       : pageType === 'concept'
-        ? VALID_CONCEPT_TAGS
-        : [];
-    const validTags = collectedTags.filter((v, i, a) =>
-      a.indexOf(v) === i && v && v !== pageType && validSubtypes.includes(v)
-    );
-    if (validTags.length > 0) {
-      result.push(`tags: [${validTags.join(', ')}]`);
+        ? (settings ? getActiveConceptTags(settings) : VALID_CONCEPT_TAGS)
+        : pageType === 'source'
+          ? (settings ? getActiveSourceTags(settings) : VALID_SOURCE_TAGS)
+          : [];
+    const dedupedTags: string[] = [];
+    const outOfVocab: string[] = [];
+    for (const tag of collectedTags) {
+      if (!tag || tag === pageType) continue;
+      if (dedupedTags.includes(tag)) continue;
+      dedupedTags.push(tag);
+      if (!validSubtypes.includes(tag)) outOfVocab.push(tag);
+    }
+    if (outOfVocab.length > 0) {
+      // Issue #85 v6: surface the divergence to the user via console.debug
+      // (no Notice — the user already saw a success Notice from the
+      // ingestion; we don't want to spam a separate "tag mismatch"
+      // pop-up. The debug log is enough to diagnose in DevTools.)
+      console.debug(
+        `[enforceFrontmatterConstraints] ${pageType} page retained ${outOfVocab.length} tag(s) not in active vocabulary (${validSubtypes.length} entries):`,
+        outOfVocab
+      );
+    }
+    if (dedupedTags.length > 0) {
+      result.push(`tags: [${dedupedTags.join(', ')}]`);
     } else {
-      const fallback = pageType === 'entity' ? 'other' : pageType === 'concept' ? 'term' : '';
-      result.push(`tags: [${fallback}]`);
+      // Preserve empty tags field rather than forcing a default — user intent must win.
+      // Domain tags (e.g. "Mikrobiologie") survive here; they are outside the subtype
+      // whitelist but are not wrong. Configurable vocabulary is tracked in Issue #85.
+      result.push('tags:');
     }
   }
 
@@ -869,6 +933,63 @@ export function formatRateLimitNotice(
     .replace('{suggestedDelay}', String(info.suggestedDelay));
 }
 
+/**
+ * Strip a leading "# " (H1) from a markdown title and promote all subsequent
+ * "#" headings down by one level (H1 → H2, H2 → H3, etc.). Used to nest a
+ * sub-report's title under a parent log entry heading.
+ *
+ * Example: "# Wiki Lint Report\n## Body\n### Detail" →
+ *          "## Body\n#### Detail" (H1 stripped, H2 → H3, H3 → H4)
+ */
+export function nestReportUnderParent(report: string): string {
+  const lines = report.split('\n');
+  let h1Stripped = false;
+  const out: string[] = [];
+  for (const line of lines) {
+    // ATX heading: one or more `#` chars at start, followed by space then text
+    const m = /^(#+)\s/.exec(line);
+    if (m) {
+      if (!h1Stripped && m[1].length === 1) {
+        // First H1: strip entirely (parent already provides title)
+        h1Stripped = true;
+        continue;
+      }
+      // Subsequent heading: promote one level (H2 → H3, H3 → H4, …)
+      out.push('#' + line);
+      h1Stripped = true; // defensive: any heading before first H1 should also strip-then-promote
+      continue;
+    }
+    out.push(line);
+  }
+  return out.join('\n');
+}
+
+/**
+ * Truncate a list of items to a visible cap, with a "... N more" trailer
+ * for the Modal display, or return the full list for log persistence.
+ *
+ * Issue: lint report > 20 dead links was truncated to "... 857 more" in BOTH
+ * the modal AND the persisted log.md. Log should keep the full enumeration
+ * (it's the persistent audit trail). This helper returns a (modal, log) pair
+ * so the controller can write different content to each destination.
+ */
+export function truncateListForDisplay<T>(
+  items: T[],
+  formatItem: (item: T, index: number) => string,
+  visibleCap = 20,
+  moreTemplate = (n: number) => `- ... ${n} more`
+): { modalReport: string; logReport: string } {
+  const all = items.map(formatItem).join('\n');
+  if (items.length <= visibleCap) {
+    return { modalReport: all, logReport: all };
+  }
+  const visible = items.slice(0, visibleCap).map(formatItem).join('\n');
+  return {
+    modalReport: visible + '\n' + moreTemplate(items.length - visibleCap),
+    logReport: all, // log keeps every entry
+  };
+}
+
 // Truncate mentions to a reasonable token budget for merge/create prompts.
 export function truncateMentions(
   mentions: string[] | undefined,
@@ -920,6 +1041,76 @@ export function extractSourceTags(content: string): string[] {
     return raw.map(t => String(t).trim()).filter(t => t.length > 0);
   }
   return [];
+}
+
+// ── Tag vocabulary (Issue #85) ────────────────────────────────
+// User-configurable controlled vocabulary. When tagVocabularyMode is 'default'
+// the hard-coded VALID_*_TAGS arrays from types.ts are used (preserves backward
+// compatibility for users who never set the mode). When 'custom', the user's
+// customEntityTags / customConceptTags CSV strings are used (with default
+// fallback if the user clears the input).
+//
+// Nested tag syntax (e.g. "Arzneimittel/Neurologie") is preserved verbatim;
+// Obsidian's tag parser splits on "/" at display time.
+
+/**
+ * Active entity tag vocabulary for ingest / lint / fix-runners.
+ * Falls back to the hardcoded defaults when settings.tagVocabularyMode is
+ * not 'custom', or when the user has cleared the custom field.
+ */
+export function getActiveEntityTags(settings: LLMWikiSettings): string[] {
+  const custom = (settings.customEntityTags ?? '').trim();
+  if (settings.tagVocabularyMode === 'custom' && custom.length > 0) {
+    const userTags = custom.split(',').map(t => t.trim()).filter(t => t.length > 0);
+    return Array.from(new Set(userTags));
+  }
+  return [...VALID_ENTITY_TAGS];
+}
+
+/**
+ * Active concept tag vocabulary. See getActiveEntityTags for behavior.
+ */
+export function getActiveConceptTags(settings: LLMWikiSettings): string[] {
+  const custom = (settings.customConceptTags ?? '').trim();
+  if (settings.tagVocabularyMode === 'custom' && custom.length > 0) {
+    const userTags = custom.split(',').map(t => t.trim()).filter(t => t.length > 0);
+    return Array.from(new Set(userTags));
+  }
+  return [...VALID_CONCEPT_TAGS];
+}
+
+/**
+ * Issue #85 v7: source-page active vocabulary. Per design decision,
+ * the source vocabulary is NOT user-configurable — it is a static
+ * "form" taxonomy (paper / document / article / …) baked into
+ * `VALID_SOURCE_TAGS`. This function exists for shape parity with
+ * getActiveEntityTags / getActiveConceptTags so the audit + retag
+ * runner can call `getActiveSourceTags(settings)` uniformly.
+ */
+export function getActiveSourceTags(settings: LLMWikiSettings): string[] {
+  return [...VALID_SOURCE_TAGS];
+}
+
+/**
+ * Normalize a custom-vocabulary CSV string to canonical form.
+ * Trims whitespace, drops empty entries, dedupes case-insensitively
+ * (keeping the first casing seen), joins with ", " for human-readable
+ * persistence. Idempotent: normalizing an already-canonical string
+ * returns it unchanged.
+ */
+export function normalizeVocabularyCsv(csv: string): string {
+  if (!csv) return '';
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const raw of csv.split(',')) {
+    const trimmed = raw.trim();
+    if (!trimmed) continue;
+    const key = trimmed.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    result.push(trimmed);
+  }
+  return result.join(', ');
 }
 
 // ── Index parsing & local keyword matching ─────────────────────
