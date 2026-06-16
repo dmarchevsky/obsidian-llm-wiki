@@ -90,6 +90,8 @@ export interface LintCounts {
   caseVariantDuplicates: number;
   uppercasePageNames: number;
   tagViolations: number;
+  // Issue #126: quotes not found in source files
+  ungroundedQuotes: number;
 }
 
 export class LintReportModal extends Modal {

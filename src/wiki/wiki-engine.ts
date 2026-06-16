@@ -32,8 +32,9 @@ import {
 import {
   LintFixer,
   getExistingWikiPages,
-} from './lint-fixes';
+} from './lint/fixer';
 import { ContradictionManager } from './contradictions';
+import { fixPollutedSources } from '../core/sources-normalizer';
 import { UNIVERSAL_LINK_CONSTRAINTS } from './prompts/constraints';
 import { SourceAnalyzer } from './source-analyzer';
 import { TOKENS_PAGE_GENERATION, NOTICE_ABORT, NOTICE_RATE_LIMIT, NOTICE_NORMAL, PAGES_CACHE_TTL_MS, WIKI_SUBFOLDERS } from '../constants';
@@ -146,6 +147,19 @@ export class WikiEngine {
     return this.onProgress;
   }
 
+  setStatusBarUpdateCallback(cb: ((text: string) => void) | null): void {
+    this.onStatusBarUpdate = cb;
+  }
+
+  updateStatusBar(text: string): void {
+    this.onStatusBarUpdate?.(text);
+  }
+
+  private notifyProgress(msg: string): void {
+    this.onProgress?.(msg);
+    this.updateStatusBar(msg);
+  }
+
   setDoneCallback(cb: ((report: IngestReport) => void) | null): void {
     this.onDone = cb;
   }
@@ -158,19 +172,6 @@ export class WikiEngine {
   setLintCallbacks(onStart: (() => void) | null, onEnd: (() => void) | null): void {
     this.onLintStart = onStart;
     this.onLintEnd = onEnd;
-  }
-
-  setStatusBarUpdateCallback(cb: ((text: string) => void) | null): void {
-    this.onStatusBarUpdate = cb;
-  }
-
-  updateStatusBar(text: string): void {
-    this.onStatusBarUpdate?.(text);
-  }
-
-  private notifyProgress(msg: string): void {
-    this.onProgress?.(msg);
-    this.updateStatusBar(msg);
   }
 
   cancelIngestion(): void {
@@ -825,7 +826,7 @@ export class WikiEngine {
       max_tokens: TOKENS_PAGE_GENERATION,
       system: await this.buildSystemPrompt('summary'),
       messages: [{ role: 'user', content: finalPrompt }],
-      disableThinking: this.settings.disableThinking,
+      enableThinking: !this.settings.disableThinking,
     });
 
     const cleanedContent = cleanMarkdownResponse(pageContent);
@@ -872,6 +873,20 @@ export class WikiEngine {
           return `[[${folder}/${rest}${displayPart}]]`;
         }
       );
+    }
+
+    // Issue #125: normalize the `sources:` frontmatter field on every write.
+    // The LLM emits raw note paths ("[[Notizen/Autonome Dysregulation.md]]"),
+    // `.md` extensions, `|alias` pipes, and space/paren-containing titles. Left
+    // unfixed these become dead links that previously required a post-ingest
+    // cleanup script. normalizeSourcesField (Issue #81) already exists and is
+    // unit-tested but was only wired into the lint/auto-maintain paths — not the
+    // generation/merge write path that produces this pollution in the first place.
+    const preserveCase = this.settings.slugCase === 'preserve';
+    const sourcesFix = fixPollutedSources(content, this.settings.wikiFolder, preserveCase);
+    if (sourcesFix.fixed > 0) {
+      console.warn(`createOrUpdateFile: normalized polluted sources field in ${path}`);
+      content = sourcesFix.content;
     }
 
     for (let attempt = 0; attempt < 3; attempt++) {
